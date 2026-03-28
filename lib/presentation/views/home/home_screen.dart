@@ -1,0 +1,115 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
+import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
+import 'package:mirage_by_aurues/presentation/viewmodels/home_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/widgets/category_card.dart';
+import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
+
+/// Home screen — vertical list of alternating category cards.
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeViewModel>().loadCategories();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>().currentTheme;
+
+    return Container(
+      color: theme.surface,
+      child: Consumer<HomeViewModel>(
+        builder: (_, vm, __) {
+          if (vm.isLoading) {
+            return const ShimmerCategoryList();
+          }
+
+          if (vm.error != null) {
+            return _buildError(vm, theme);
+          }
+
+          return RefreshIndicator(
+            onRefresh: vm.loadCategories,
+            color: theme.accent,
+            child: ListView(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 80,
+                left: 16,
+                right: 16,
+                bottom: 100,
+              ),
+              children: [
+                // Header
+                Text(
+                  'COLLECTIONS',
+                  style: MirageTypography.displaySmall(color: theme.textPrimary)
+                      .copyWith(letterSpacing: 6),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Curated categories for your space',
+                  style: MirageTypography.bodyMedium(color: theme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                // Category cards
+                ...List.generate(vm.categories.length, (index) {
+                  return CategoryCard(
+                    category: vm.categories[index],
+                    index: index,
+                    onTap: () {
+                      Navigator.of(context).pushNamed(
+                        '/catalog',
+                        arguments: vm.categories[index].id,
+                      );
+                    },
+                  );
+                }),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildError(HomeViewModel vm, dynamic theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off, size: 48, color: theme.textSecondary),
+            const SizedBox(height: 16),
+            Text(
+              'Unable to load categories',
+              style: MirageTypography.headingMedium(color: theme.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              vm.error!,
+              style: MirageTypography.bodySmall(color: theme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: vm.loadCategories,
+              child: const Text('RETRY'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
