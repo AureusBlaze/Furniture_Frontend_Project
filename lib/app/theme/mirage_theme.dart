@@ -3,17 +3,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'themes/mirage_theme_data.dart';
 
 /// Builds a Material [ThemeData] from a [MirageThemeData].
-/// This bridges the custom Mirage design tokens to Flutter's theming system.
+/// Bridges custom Mirage design tokens to Flutter's theming system.
+/// Buttons use solid accent-complementary colors.
 class MirageTheme {
   MirageTheme._();
 
   static ThemeData fromMirageTheme(MirageThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: theme.brightness,
       scaffoldBackgroundColor: theme.surface,
       colorScheme: ColorScheme(
-        brightness: Brightness.light,
+        brightness: theme.brightness,
         primary: theme.primaryDark,
         onPrimary: theme.textOnDark,
         secondary: theme.accentWarm,
@@ -39,9 +42,10 @@ class MirageTheme {
         ),
         iconTheme: IconThemeData(color: theme.textOnDark),
       ),
+      // Solid accent-colored elevated buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryDark,
+          backgroundColor: theme.accentWarm,
           foregroundColor: theme.textOnDark,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -55,10 +59,11 @@ class MirageTheme {
           ),
         ),
       ),
+      // Solid outlined buttons with accent border
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: theme.textPrimary,
-          side: BorderSide(color: theme.surfaceVariant),
+          foregroundColor: theme.textOnDark,
+          side: BorderSide(color: theme.accentWarm),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -70,17 +75,31 @@ class MirageTheme {
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: theme.accent,
+          textStyle: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: theme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        fillColor: isDark
+            ? theme.surfaceVariant.withValues(alpha: 0.3)
+            : theme.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: theme.surfaceVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.surfaceVariant.withValues(alpha: 0.5)),
+          borderSide: BorderSide(
+              color: theme.surfaceVariant.withValues(alpha: 0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

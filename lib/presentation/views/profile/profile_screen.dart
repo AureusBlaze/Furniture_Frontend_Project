@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/widgets/bevel_container.dart';
 
-/// Profile screen — user info, theme switcher, and logout.
+/// Profile screen — user info, theme navigation, and logout.
 /// Shows login prompt if unauthenticated.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -98,8 +99,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // Theme switcher (available without login)
-            _buildThemeSection(context, theme),
+            // Theme config navigation
+            _buildThemeNavButton(context, theme),
             const SizedBox(height: 24),
             // Hidden version tap target
             _buildVersionLabel(theme),
@@ -120,44 +121,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       children: [
         // User info header
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.primaryDark,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: theme.accentWarm,
-                child: Text(
-                  authVm.user?.name.substring(0, 1).toUpperCase() ?? '?',
-                  style: MirageTypography.headingLarge(color: theme.textOnDark),
+        BevelContainer(
+          borderRadius: 20,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.primaryDark,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: theme.accentWarm,
+                  child: Text(
+                    authVm.user?.name.substring(0, 1).toUpperCase() ?? '?',
+                    style: MirageTypography.headingLarge(color: theme.textOnDark),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      authVm.user?.name ?? '',
-                      style: MirageTypography.headingMedium(
-                        color: theme.textOnDark,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        authVm.user?.name ?? '',
+                        style: MirageTypography.headingMedium(
+                          color: theme.textOnDark,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      authVm.user?.email ?? '',
-                      style: MirageTypography.bodySmall(
-                        color: theme.textOnDark.withValues(alpha: 0.6),
+                      const SizedBox(height: 2),
+                      Text(
+                        authVm.user?.email ?? '',
+                        style: MirageTypography.bodySmall(
+                          color: theme.textOnDark.withValues(alpha: 0.6),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -184,8 +189,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         const SizedBox(height: 24),
 
-        // Theme section
-        _buildThemeSection(context, theme),
+        // Theme config navigation
+        _buildThemeNavButton(context, theme),
 
         const SizedBox(height: 24),
 
@@ -217,98 +222,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: theme.textSecondary, size: 22),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: theme.textPrimary,
-          fontWeight: FontWeight.w500,
+    return BevelContainer(
+      borderRadius: 12,
+      padding: EdgeInsets.zero,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(icon, color: theme.textSecondary, size: 22),
+        title: Text(
+          label,
+          style: TextStyle(
+            color: theme.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        trailing: Icon(Icons.chevron_right, color: theme.textSecondary, size: 20),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
-      trailing: Icon(Icons.chevron_right, color: theme.textSecondary, size: 20),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 
-  Widget _buildThemeSection(BuildContext context, dynamic theme) {
-    final themeProvider = context.watch<ThemeProvider>();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'APPEARANCE',
-          style: MirageTypography.labelLarge(color: theme.textPrimary)
-              .copyWith(letterSpacing: 3),
+  /// Navigation button to Theme Config Screen.
+  Widget _buildThemeNavButton(BuildContext context, dynamic theme) {
+    return BevelContainer(
+      borderRadius: 16,
+      padding: EdgeInsets.zero,
+      child: ListTile(
+        leading: Icon(Icons.palette_outlined, color: theme.accent, size: 22),
+        title: Text(
+          'Customize Theme',
+          style: TextStyle(
+            color: theme.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: themeProvider.availableThemes.map((t) {
-            final isSelected = t.id == themeProvider.currentTheme.id;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => themeProvider.setTheme(t.id),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? t.primaryDark
-                        : t.primaryDark.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? t.accent : Colors.transparent,
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Color preview
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _colorDot(t.primaryDark),
-                          _colorDot(t.accentWarm),
-                          _colorDot(t.accent),
-                          _colorDot(t.surface),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        t.name,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected ? t.textOnDark : theme.textPrimary,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+        subtitle: Text(
+          context.watch<ThemeProvider>().currentTheme.name,
+          style: TextStyle(
+            color: theme.textSecondary,
+            fontSize: 12,
+          ),
         ),
-      ],
-    );
-  }
-
-  Widget _colorDot(Color color) {
-    return Container(
-      width: 12,
-      height: 12,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 0.5,
-        ),
+        trailing: Icon(Icons.chevron_right, color: theme.accent, size: 20),
+        onTap: () => Navigator.of(context).pushNamed('/theme-config'),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
     );
   }

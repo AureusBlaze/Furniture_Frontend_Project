@@ -1,9 +1,12 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 
-/// Floating bottom navigation bar — dark pill with 4 tab icons.
+/// Floating bottom navigation bar — separated solid containers with bevels.
+/// Layout: [Home | Catalog | AR]  (gap)  [Profile]
+///
+/// Performance: Uses solid opaque containers instead of BackdropFilter
+/// to avoid GPU-heavy blur compositing during scrolling.
 class MirageBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -14,77 +17,107 @@ class MirageBottomNavBar extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _items = [
-    _NavItem(Icons.home_outlined, Icons.home, 'Home'),
-    _NavItem(Icons.grid_view_outlined, Icons.grid_view, 'Catalog'),
-    _NavItem(Icons.view_in_ar_outlined, Icons.view_in_ar, 'AR'),
-    _NavItem(Icons.person_outline, Icons.person, 'Profile'),
+  // Tab order: Home(0), Catalog(1), AR(2), --gap--, Profile(3)
+  static const _leftItems = [
+    _NavItem(Icons.home_outlined, Icons.home, 'Home', 0),
+    _NavItem(Icons.grid_view_outlined, Icons.grid_view, 'Catalog', 1),
+    _NavItem(Icons.view_in_ar_outlined, Icons.view_in_ar, 'AR', 2),
   ];
+
+  static const _rightItem =
+      _NavItem(Icons.person_outline, Icons.person, 'Profile', 3);
 
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 24, left: 40, right: 40),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                color: theme.primaryDark.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 0.5,
-                ),
+    return RepaintBoundary(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 24, left: 20, right: 20),
+          child: Row(
+            children: [
+              // Left group: Home, Catalog, AR
+              ..._leftItems.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _buildNavItem(theme, item),
+                );
+              }),
+              // Spacer
+              const Spacer(),
+              // Right: Profile (separated)
+              _buildNavItem(theme, _rightItem),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(dynamic theme, _NavItem item) {
+    final isActive = item.index == currentIndex;
+
+    return GestureDetector(
+      onTap: () => onTap(item.index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          // Solid opaque background — no BackdropFilter needed
+          color: isActive
+              ? theme.primaryDark
+              : theme.primaryDark.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? theme.accent.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.08),
+            width: isActive ? 1.0 : 0.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.bevelHighlight,
+              offset: const Offset(-1, -1),
+              blurRadius: 2,
+            ),
+            BoxShadow(
+              color: theme.bevelShadow,
+              offset: const Offset(1, 1),
+              blurRadius: 2,
+            ),
+            if (isActive)
+              BoxShadow(
+                color: theme.accent.withValues(alpha: 0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(_items.length, (index) {
-                  final isActive = index == currentIndex;
-                  final item = _items[index];
-                  return GestureDetector(
-                    onTap: () => onTap(index),
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isActive ? item.activeIcon : item.icon,
-                            size: 22,
-                            color: isActive
-                                ? theme.accent
-                                : theme.textOnDark.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: 2),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: isActive ? 4 : 0,
-                            height: isActive ? 4 : 0,
-                            decoration: BoxDecoration(
-                              color: theme.accent,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isActive ? item.activeIcon : item.icon,
+              size: 22,
+              color: isActive
+                  ? theme.accent
+                  : theme.textOnDark.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 2),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isActive ? 4 : 0,
+              height: isActive ? 4 : 0,
+              decoration: BoxDecoration(
+                color: theme.accent,
+                shape: BoxShape.circle,
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -95,5 +128,6 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const _NavItem(this.icon, this.activeIcon, this.label);
+  final int index;
+  const _NavItem(this.icon, this.activeIcon, this.label, this.index);
 }

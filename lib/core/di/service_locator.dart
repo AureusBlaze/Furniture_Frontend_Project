@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:mirage_by_aurues/core/network/api_client.dart';
+import 'package:mirage_by_aurues/core/network/connection_status_service.dart';
 import 'package:mirage_by_aurues/core/storage/secure_storage.dart';
 import 'package:mirage_by_aurues/core/dev/dev_settings_provider.dart';
 import 'package:mirage_by_aurues/data/datasources/remote/auth_remote_data_source.dart';
@@ -38,6 +39,14 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton<ApiClient>(
     () => ApiClient(secureStorage: sl<SecureStorageService>()),
   );
+
+  // ─── Connection Status (uses ApiClient, so must be registered after it) ──
+  sl.registerLazySingleton<ConnectionStatusService>(
+    () => ConnectionStatusService(sl<ApiClient>()),
+  );
+
+  // Wire the status interceptor into Dio (two-phase init to break circular dep)
+  sl<ApiClient>().attachStatusInterceptor(sl<ConnectionStatusService>());
 
   // ─── Dev Settings ────────────────────────────────────────────────
   sl.registerLazySingleton<DevSettingsProvider>(

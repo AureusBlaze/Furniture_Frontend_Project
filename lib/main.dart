@@ -5,6 +5,7 @@ import 'app/app.dart';
 import 'app/theme/theme_provider.dart';
 import 'core/di/service_locator.dart';
 import 'core/dev/dev_settings_provider.dart';
+import 'core/network/connection_status_service.dart';
 import 'presentation/viewmodels/auth_viewmodel.dart';
 import 'presentation/viewmodels/home_viewmodel.dart';
 import 'presentation/viewmodels/catalog_viewmodel.dart';
@@ -39,6 +40,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider.value(value: sl<DevSettingsProvider>()),
+        ChangeNotifierProvider.value(value: sl<ConnectionStatusService>()),
         ChangeNotifierProvider(create: (_) => sl<AuthViewModel>()..checkAuthStatus()),
         ChangeNotifierProvider(create: (_) => sl<HomeViewModel>()),
         ChangeNotifierProvider(create: (_) => sl<CatalogViewModel>()),

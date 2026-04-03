@@ -1,14 +1,19 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
-import 'package:mirage_by_aurues/domain/entities/category.dart';
 
-/// Home screen category card with alternating layout.
+/// Home screen category card with alternating layout and glassmorphism.
 /// Even index: image left, text right.
 /// Odd index: text left, image right.
+/// Text half uses BackdropFilter blur for glass effect.
+///
+/// Performance: The entire card is wrapped in RepaintBoundary at the
+/// parent level (HomeScreen). The BackdropFilter is limited to the
+/// text section only (not the entire card).
 class CategoryCard extends StatelessWidget {
-  final Category category;
+  final dynamic category;
   final int index;
   final VoidCallback? onTap;
 
@@ -28,46 +33,59 @@ class CategoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 200,
-        margin: const EdgeInsets.only(bottom: 20),
+        height: 150,
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: theme.surface,
           boxShadow: [
             BoxShadow(
-              color: theme.primaryDark.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: theme.bevelHighlight,
+              offset: const Offset(-1, -1),
+              blurRadius: 2,
+            ),
+            BoxShadow(
+              color: theme.bevelShadow,
+              offset: const Offset(1, 1),
+              blurRadius: 2,
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Row(
-            children: _isReversed
-                ? [_buildTextSection(theme), _buildImageSection(theme)]
-                : [_buildImageSection(theme), _buildTextSection(theme)],
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Full image background
+              _buildFullImage(theme),
+              // Glass text overlay on one half
+              Row(
+                children: _isReversed
+                    ? [_buildGlassTextSection(theme), const Spacer()]
+                    : [const Spacer(), _buildGlassTextSection(theme)],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildImageSection(dynamic theme) {
-    return Expanded(
-      flex: 5,
-      child: category.imageUrl != null && category.imageUrl!.isNotEmpty
-          ? CachedNetworkImage(
-              imageUrl: category.imageUrl!,
-              fit: BoxFit.cover,
-              height: double.infinity,
-              placeholder: (_, __) => Container(
-                color: theme.surfaceVariant.withValues(alpha: 0.2),
-              ),
-              errorWidget: (_, __, ___) => _buildImagePlaceholder(theme),
-            )
-          : _buildImagePlaceholder(theme),
-    );
+  Widget _buildFullImage(dynamic theme) {
+    if (category.imageUrl != null && category.imageUrl!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: category.imageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        // Memory-efficient: resize to expected display size
+        memCacheWidth: 400,
+        placeholder: (_, __) => Container(
+          color: theme.surfaceVariant.withValues(alpha: 0.2),
+        ),
+        errorWidget: (_, __, ___) => _buildImagePlaceholder(theme),
+      );
+    }
+    return _buildImagePlaceholder(theme);
   }
 
   Widget _buildImagePlaceholder(dynamic theme) {
@@ -83,79 +101,74 @@ class CategoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTextSection(dynamic theme) {
-    return Expanded(
-      flex: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment:
-              _isReversed ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              category.name.toUpperCase(),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: theme.textPrimary,
-                letterSpacing: 3,
-                fontFamily: 'PlayfairDisplay',
-              ),
-              textAlign: _isReversed ? TextAlign.right : TextAlign.left,
-            ),
-            const SizedBox(height: 8),
-            if (category.description != null)
-              Text(
-                category.description!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.textSecondary,
-                  height: 1.4,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: _isReversed ? TextAlign.right : TextAlign.left,
-              ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment:
-                  _isReversed ? MainAxisAlignment.end : MainAxisAlignment.start,
+  Widget _buildGlassTextSection(dynamic theme) {
+    return SizedBox(
+      width: 160,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            color: theme.primaryDark.withValues(alpha: 0.5),
+            child: Column(
+              crossAxisAlignment: _isReversed
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (_isReversed) ...[
+                Text(
+                  category.name.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: theme.textOnDark,
+                    letterSpacing: 2,
+                    fontFamily: 'PlayfairDisplay',
+                  ),
+                  textAlign: _isReversed ? TextAlign.left : TextAlign.right,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                if (category.description != null)
                   Text(
-                    'EXPLORE',
+                    category.description!,
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.accentWarm,
-                      letterSpacing: 2,
+                      fontSize: 11,
+                      color: theme.textOnDark.withValues(alpha: 0.6),
+                      height: 1.3,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: _isReversed ? TextAlign.left : TextAlign.right,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '←',
-                    style: TextStyle(color: theme.accentWarm, fontSize: 14),
-                  ),
-                ] else ...[
-                  Text(
-                    'EXPLORE',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.accentWarm,
-                      letterSpacing: 2,
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: _isReversed
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'EXPLORE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: theme.accent,
+                        letterSpacing: 2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '→',
-                    style: TextStyle(color: theme.accentWarm, fontSize: 14),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 12,
+                      color: theme.accent,
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -50,7 +50,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>().currentTheme;
+    final themeProvider = context.watch<ThemeProvider>();
+    final theme = themeProvider.currentTheme;
+    final bgAsset = themeProvider.currentBackgroundAsset;
 
     return Scaffold(
       body: Stack(
@@ -58,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           // Background
           Image.asset(
-            theme.backgroundAsset,
+            bgAsset,
             fit: BoxFit.cover,
           ),
           // Gradient overlay

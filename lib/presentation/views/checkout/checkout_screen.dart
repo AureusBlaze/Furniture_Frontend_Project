@@ -32,7 +32,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
-    final cartVm = context.watch<CartViewModel>();
+    final cartVm = context.read<CartViewModel>();
 
     return Scaffold(
       backgroundColor: theme.surface,

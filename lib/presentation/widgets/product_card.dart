@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -6,7 +7,10 @@ import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/domain/entities/product.dart';
 
 /// Product card for the catalog grid.
-/// Shows image, name, price, and optional AR badge.
+/// Shows image with glassmorphic text overlay, optional AR badge, and bevel.
+///
+/// Performance: BackdropFilter is constrained to only the bottom text
+/// section (not the full card). Parent wraps in RepaintBoundary.
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
@@ -25,78 +29,95 @@ class ProductCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: theme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: theme.primaryDark.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: theme.bevelHighlight,
+              offset: const Offset(-1, -1),
+              blurRadius: 2,
+            ),
+            BoxShadow(
+              color: theme.bevelShadow,
+              offset: const Offset(1, 1),
+              blurRadius: 2,
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image section
-            Expanded(
-              flex: 3,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: _buildImage(theme),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Full image background
+              _buildImage(theme),
+              // AR Badge
+              if (product.hasArModel) _buildArBadge(theme),
+              // Glassmorphic info section at bottom
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(16),
                   ),
-                  // AR Badge
-                  if (product.hasArModel) _buildArBadge(theme),
-                ],
-              ),
-            ),
-            // Info section
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      product.name,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: theme.textPrimary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (product.categoryName != null)
-                      Text(
-                        product.categoryName!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: theme.textSecondary,
-                          letterSpacing: 0.5,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.primaryDark.withValues(alpha: 0.55),
+                        border: Border(
+                          top: BorderSide(
+                            color: theme.glassBorder,
+                            width: 0.5,
+                          ),
                         ),
-                        maxLines: 1,
                       ),
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: theme.textPrimary,
-                        fontFamily: 'SpaceGrotesk',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            product.name,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textOnDark,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          if (product.categoryName != null)
+                            Text(
+                              product.categoryName!,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color:
+                                    theme.textOnDark.withValues(alpha: 0.5),
+                                letterSpacing: 0.5,
+                              ),
+                              maxLines: 1,
+                            ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: theme.accent,
+                              fontFamily: 'SpaceGrotesk',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -109,6 +130,8 @@ class ProductCard extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
+        // Memory-efficient: resize to expected display size
+        memCacheWidth: 200,
         placeholder: (_, __) => _buildShimmer(theme),
         errorWidget: (_, __, ___) => _buildPlaceholder(theme),
       );

@@ -13,6 +13,7 @@ import 'package:mirage_by_aurues/presentation/views/profile/login_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/profile/register_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/product/product_detail_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/dev/dev_settings_screen.dart';
+import 'package:mirage_by_aurues/presentation/views/profile/theme_config_screen.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shake_detector_wrapper.dart';
 
 /// Global navigator key — used by [ShakeDetectorWrapper] to push routes
@@ -96,6 +97,10 @@ class MirageApp extends StatelessWidget {
         // Category-filtered catalog — navigates to shell with catalog tab
         return MaterialPageRoute(
           builder: (_) => AppShell(initialTab: 1),
+        );
+      case '/theme-config':
+        return MaterialPageRoute(
+          builder: (_) => const ThemeConfigScreen(),
         );
       case '/dev-settings':
         return MaterialPageRoute(

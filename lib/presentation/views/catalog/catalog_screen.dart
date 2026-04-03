@@ -5,8 +5,10 @@ import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/catalog_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
+import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 
-/// Catalog screen — 2-column product grid with pagination.
+/// Catalog screen — 2-column product grid with pagination on background.
+/// Each product card is wrapped in RepaintBoundary for scroll perf.
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
 
@@ -43,8 +45,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Container(
-      color: theme.surface,
+    return BackgroundLayer(
       child: Consumer<CatalogViewModel>(
         builder: (_, vm, __) {
           if (vm.isLoading) {
@@ -72,21 +73,26 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'FULL CATALOG',
                               style: MirageTypography.displaySmall(
-                                color: theme.textPrimary,
+                                color: theme.textOnDark,
                               ).copyWith(letterSpacing: 4),
                             ),
                             TextButton.icon(
                               onPressed: () {},
-                              icon: Icon(Icons.tune, size: 18, color: theme.textSecondary),
+                              icon: Icon(Icons.tune,
+                                  size: 18,
+                                  color: theme.textOnDark
+                                      .withValues(alpha: 0.6)),
                               label: Text(
                                 'FILTERS',
                                 style: MirageTypography.labelSmall(
-                                  color: theme.textSecondary,
+                                  color: theme.textOnDark
+                                      .withValues(alpha: 0.6),
                                 ),
                               ),
                             ),
@@ -103,19 +109,23 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (_, index) {
                         final product = vm.products[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              '/product',
-                              arguments: product.id,
-                            );
-                          },
+                        // RepaintBoundary isolates each card's blur
+                        return RepaintBoundary(
+                          child: ProductCard(
+                            product: product,
+                            onTap: () {
+                              Navigator.of(context).pushNamed(
+                                '/product',
+                                arguments: product.id,
+                              );
+                            },
+                          ),
                         );
                       },
                       childCount: vm.products.length,
                     ),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
@@ -124,11 +134,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   ),
                 ),
                 if (vm.isLoadingMore)
-                  const SliverPadding(
-                    padding: EdgeInsets.all(24),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(24),
                     sliver: SliverToBoxAdapter(
                       child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: theme.accent,
+                        ),
                       ),
                     ),
                   ),
@@ -151,15 +164,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off, size: 48, color: theme.textSecondary),
+            Icon(Icons.cloud_off,
+                size: 48,
+                color: theme.textOnDark.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             Text('Unable to load products',
-                style: MirageTypography.headingMedium(color: theme.textPrimary)),
+                style: MirageTypography.headingMedium(
+                    color: theme.textOnDark)),
             const SizedBox(height: 8),
-            Text(vm.error!, style: MirageTypography.bodySmall(color: theme.textSecondary)),
+            Text(vm.error!,
+                style: MirageTypography.bodySmall(
+                    color: theme.textOnDark.withValues(alpha: 0.5))),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: vm.refresh,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.accentWarm,
+                foregroundColor: theme.textOnDark,
+              ),
               child: const Text('RETRY'),
             ),
           ],

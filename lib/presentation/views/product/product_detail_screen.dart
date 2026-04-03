@@ -179,34 +179,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 32),
-                      // Add to cart
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            context.read<CartViewModel>().addToCart(
-                                  CartItem(
-                                    productId: product.id,
-                                    name: product.name,
-                                    price: product.price,
-                                    imageUrl: product.imageUrl,
-                                    quantity: vm.quantity,
-                                  ),
-                                );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Added to cart'),
-                                backgroundColor: theme.primaryDark,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                      // Add to cart — isolated in its own Consumer + RepaintBoundary
+                      // so CartViewModel rebuilds touch ONLY this button, not the
+                      // entire product detail CustomScrollView.
+                      RepaintBoundary(
+                        child: Selector<CartViewModel, bool>(
+                          selector: (_, vm) => vm.isBusy,
+                          builder: (_, isBusy, __) {
+                            return SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton.icon(
+                                onPressed: isBusy
+                                    ? null
+                                    : () async {
+                                        final cartVm = context.read<CartViewModel>();
+                                        final messenger = ScaffoldMessenger.of(context);
+                                        final productName = product.name;
+
+                                        try {
+                                          final success = await cartVm.addToCart(
+                                            CartItem(
+                                              productId: product.id,
+                                              name: productName,
+                                              price: product.price,
+                                              imageUrl: product.imageUrl,
+                                              quantity: vm.quantity,
+                                            ),
+                                          );
+
+                                          if (!context.mounted) return;
+
+                                          messenger.clearSnackBars();
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                success
+                                                    ? '$productName added to cart'
+                                                    : 'Could not add to cart — please try again',
+                                              ),
+                                              backgroundColor: success
+                                                  ? theme.primaryDark
+                                                  : theme.error,
+                                              behavior: SnackBarBehavior.floating,
+                                              duration: const Duration(seconds: 2),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          debugPrint('[ProductDetail] ❌ Add to cart error: $e');
+                                          if (!context.mounted) return;
+                                          messenger.clearSnackBars();
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text('Error: $e'),
+                                              backgroundColor: theme.error,
+                                              behavior: SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                icon: isBusy
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: theme.textOnDark,
+                                        ),
+                                      )
+                                    : const Icon(Icons.shopping_bag_outlined),
+                                label: Text(isBusy ? 'ADDING...' : 'ADD TO CART'),
                               ),
                             );
                           },
-                          icon: const Icon(Icons.shopping_bag_outlined),
-                          label: const Text('ADD TO CART'),
                         ),
                       ),
                       const SizedBox(height: 40),

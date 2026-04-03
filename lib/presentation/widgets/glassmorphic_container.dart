@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 
 /// A glassmorphic container matching the Mirage design system.
-/// Frosted glass panel with subtle border and blur.
+/// Frosted glass panel with subtle border, blur, and optional bevel.
 class GlassmorphicContainer extends StatelessWidget {
   final Widget child;
   final double? width;
@@ -14,6 +14,7 @@ class GlassmorphicContainer extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final double? opacity;
   final double? blur;
+  final bool showBevel;
 
   const GlassmorphicContainer({
     super.key,
@@ -25,6 +26,7 @@ class GlassmorphicContainer extends StatelessWidget {
     this.margin,
     this.opacity,
     this.blur,
+    this.showBevel = true,
   });
 
   @override
@@ -37,6 +39,23 @@ class GlassmorphicContainer extends StatelessWidget {
       width: width,
       height: height,
       margin: margin,
+      decoration: showBevel
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.bevelHighlight,
+                  offset: const Offset(-1, -1),
+                  blurRadius: 2,
+                ),
+                BoxShadow(
+                  color: theme.bevelShadow,
+                  offset: const Offset(1, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            )
+          : null,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(

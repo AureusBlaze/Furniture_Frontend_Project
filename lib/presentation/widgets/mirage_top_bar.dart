@@ -1,19 +1,24 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/widgets/bevel_container.dart';
 
-/// Mirage top bar split into dark-left and light-right sections.
+/// Mirage top bar — circular nav button + cart on left, "MIRAGE" center,
+/// search + camera on right.
+///
+/// Performance: Removed BackdropFilter from cart and right containers;
+/// uses solid opaque containers instead.
 class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
-  final VoidCallback? onMenuTap;
+  final VoidCallback? onNavHubTap;
   final VoidCallback? onCartTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onCameraTap;
 
   const MirageTopBar({
     super.key,
-    this.onMenuTap,
+    this.onNavHubTap,
     this.onCartTap,
     this.onSearchTap,
     this.onCameraTap,
@@ -26,85 +31,121 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return SafeArea(
-      child: Container(
-        height: 60,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Row(
-              children: [
-                // Dark section: menu + cart
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.primaryDark.withValues(alpha: 0.85),
-                      borderRadius: const BorderRadius.horizontal(
-                        left: Radius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.menu, color: theme.textOnDark, size: 20),
-                          onPressed: onMenuTap,
-                        ),
-                        _buildCartButton(context, theme),
-                      ],
-                    ),
-                  ),
+    return RepaintBoundary(
+      child: SafeArea(
+        child: Container(
+          height: 60,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              // Left: Circular Nav Button + Cart
+              _buildLeftSection(context, theme),
+              const Spacer(),
+              // Center: "MIRAGE" brand name
+              Text(
+                'MIRAGE',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 6,
+                  color: theme.textOnDark.withValues(alpha: 0.7),
                 ),
-                // Light section: brand + search + camera
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.surface.withValues(alpha: 0.9),
-                      borderRadius: const BorderRadius.horizontal(
-                        right: Radius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          'MIRAGE',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 6,
-                            color: theme.textOnLight,
-                            fontFamily: 'PlayfairDisplay',
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.search, color: theme.textOnLight, size: 20),
-                          onPressed: onSearchTap,
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.camera_alt_outlined,
-                              color: theme.textOnLight, size: 20),
-                          onPressed: onCameraTap,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const Spacer(),
+              // Right: Search + Camera
+              _buildRightSection(theme),
+            ],
           ),
         ),
       ),
     );
   }
 
+  Widget _buildLeftSection(BuildContext context, dynamic theme) {
+    return Row(
+      children: [
+        // Circular nav hub button
+        BevelContainer(
+          isCircular: true,
+          backgroundColor: theme.primaryDark.withValues(alpha: 0.85),
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: IconButton(
+              icon: Icon(Icons.blur_circular_outlined,
+                  color: theme.accent, size: 20),
+              onPressed: onNavHubTap ??
+                  () => Navigator.of(context)
+                      .pushReplacementNamed('/navigation'),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Cart button — solid container, no BackdropFilter
+        Container(
+          decoration: BoxDecoration(
+            color: theme.primaryDark.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: theme.bevelHighlight,
+                offset: const Offset(-1, -1),
+                blurRadius: 2,
+              ),
+              BoxShadow(
+                color: theme.bevelShadow,
+                offset: const Offset(1, 1),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: _buildCartButton(context, theme),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRightSection(dynamic theme) {
+    // Solid container — no BackdropFilter
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.primaryDark.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: theme.bevelHighlight,
+            offset: const Offset(-1, -1),
+            blurRadius: 2,
+          ),
+          BoxShadow(
+            color: theme.bevelShadow,
+            offset: const Offset(1, 1),
+            blurRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.search,
+                color: theme.textOnDark, size: 20),
+            onPressed: onSearchTap,
+          ),
+          IconButton(
+            icon: Icon(Icons.camera_alt_outlined,
+                color: theme.textOnDark, size: 20),
+            onPressed: onCameraTap,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCartButton(BuildContext context, dynamic theme) {
-    return Consumer<CartViewModel>(
-      builder: (_, cart, __) {
+    return Selector<CartViewModel, int>(
+      selector: (_, vm) => vm.itemCount,
+      builder: (_, count, __) {
         return Stack(
           children: [
             IconButton(
@@ -112,7 +153,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
                   color: theme.textOnDark, size: 20),
               onPressed: onCartTap,
             ),
-            if (cart.itemCount > 0)
+            if (count > 0)
               Positioned(
                 top: 6,
                 right: 6,
@@ -125,7 +166,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '${cart.itemCount}',
+                      '$count',
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
@@ -141,3 +182,4 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 }
+

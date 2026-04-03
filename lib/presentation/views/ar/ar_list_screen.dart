@@ -5,8 +5,10 @@ import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/ar_list_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
+import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 
-/// AR List screen — products with AR support.
+/// AR List screen — products with AR support, dynamically populated
+/// from the database (only items flagged as AR-enabled).
 class ArListScreen extends StatefulWidget {
   const ArListScreen({super.key});
 
@@ -27,8 +29,7 @@ class _ArListScreenState extends State<ArListScreen> {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Container(
-      color: theme.surface,
+    return BackgroundLayer(
       child: Consumer<ArListViewModel>(
         builder: (_, vm, __) {
           if (vm.isLoading) {
@@ -40,10 +41,12 @@ class _ArListScreenState extends State<ArListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.view_in_ar, size: 48, color: theme.textSecondary),
+                  Icon(Icons.view_in_ar, size: 48,
+                      color: theme.textOnDark.withValues(alpha: 0.5)),
                   const SizedBox(height: 16),
                   Text('Unable to load AR products',
-                      style: MirageTypography.headingMedium(color: theme.textPrimary)),
+                      style: MirageTypography.headingMedium(
+                          color: theme.textOnDark)),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: vm.loadArProducts,
@@ -60,13 +63,15 @@ class _ArListScreenState extends State<ArListScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.view_in_ar_outlined, size: 64,
-                      color: theme.textSecondary.withValues(alpha: 0.3)),
+                      color: theme.textOnDark.withValues(alpha: 0.2)),
                   const SizedBox(height: 16),
                   Text('No AR products available',
-                      style: MirageTypography.headingMedium(color: theme.textPrimary)),
+                      style: MirageTypography.headingMedium(
+                          color: theme.textOnDark)),
                   const SizedBox(height: 8),
                   Text('AR-enabled products will appear here',
-                      style: MirageTypography.bodyMedium(color: theme.textSecondary)),
+                      style: MirageTypography.bodyMedium(
+                          color: theme.textOnDark.withValues(alpha: 0.5))),
                 ],
               ),
             );
