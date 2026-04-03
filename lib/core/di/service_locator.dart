@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:mirage_by_aurues/core/network/api_client.dart';
 import 'package:mirage_by_aurues/core/storage/secure_storage.dart';
+import 'package:mirage_by_aurues/core/dev/dev_settings_provider.dart';
 import 'package:mirage_by_aurues/data/datasources/remote/auth_remote_data_source.dart';
 import 'package:mirage_by_aurues/data/datasources/remote/product_remote_data_source.dart';
 import 'package:mirage_by_aurues/data/datasources/remote/category_remote_data_source.dart';
@@ -36,6 +37,11 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton<SecureStorageService>(() => SecureStorageService());
   sl.registerLazySingleton<ApiClient>(
     () => ApiClient(secureStorage: sl<SecureStorageService>()),
+  );
+
+  // ─── Dev Settings ────────────────────────────────────────────────
+  sl.registerLazySingleton<DevSettingsProvider>(
+    () => DevSettingsProvider(sl<ApiClient>()),
   );
 
   // ─── Data Sources ────────────────────────────────────────────────

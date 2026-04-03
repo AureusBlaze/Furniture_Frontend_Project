@@ -7,10 +7,10 @@ import 'auth_interceptor.dart';
 class ApiClient {
   late final Dio dio;
 
-  ApiClient({required SecureStorageService secureStorage}) {
+  ApiClient({required SecureStorageService secureStorage, String? initialBaseUrl}) {
     dio = Dio(
       BaseOptions(
-        baseUrl: AppConstants.baseUrl,
+        baseUrl: initialBaseUrl ?? AppConstants.baseUrl,
         connectTimeout: AppConstants.connectTimeout,
         receiveTimeout: AppConstants.receiveTimeout,
         headers: {
@@ -28,5 +28,10 @@ class ApiClient {
         logPrint: (obj) => print('[API] $obj'),
       ),
     ]);
+  }
+
+  /// Dynamically update the base URL used by all subsequent requests.
+  void updateBaseUrl(String newUrl) {
+    dio.options.baseUrl = newUrl;
   }
 }

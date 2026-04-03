@@ -25,13 +25,24 @@ class AiRemoteDataSource {
         data: formData,
         options: Options(
           contentType: 'multipart/form-data',
-          receiveTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 120),
         ),
       );
 
       final data = response.data;
       List<dynamic> items;
-      if (data is Map && data.containsKey('data')) {
+
+      if (data is Map && data.containsKey('suggestions')) {
+        // Backend returns: { "detected_tags": [...], "suggestions": { "data": [...] } }
+        final suggestions = data['suggestions'];
+        if (suggestions is Map && suggestions.containsKey('data')) {
+          items = suggestions['data'] as List;
+        } else if (suggestions is List) {
+          items = suggestions;
+        } else {
+          items = [];
+        }
+      } else if (data is Map && data.containsKey('data')) {
         items = data['data'] as List;
       } else if (data is Map && data.containsKey('products')) {
         items = data['products'] as List;

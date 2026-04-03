@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/theme_provider.dart';
@@ -11,6 +12,12 @@ import 'package:mirage_by_aurues/presentation/views/camera/camera_ai_screen.dart
 import 'package:mirage_by_aurues/presentation/views/profile/login_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/profile/register_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/product/product_detail_screen.dart';
+import 'package:mirage_by_aurues/presentation/views/dev/dev_settings_screen.dart';
+import 'package:mirage_by_aurues/presentation/widgets/shake_detector_wrapper.dart';
+
+/// Global navigator key — used by [ShakeDetectorWrapper] to push routes
+/// from outside the widget tree.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MirageApp extends StatelessWidget {
   const MirageApp({super.key});
@@ -19,13 +26,24 @@ class MirageApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (_, themeProvider, __) {
-        return MaterialApp(
+        Widget app = MaterialApp(
           title: 'Mirage',
           debugShowCheckedModeBanner: false,
           theme: themeProvider.themeData,
+          navigatorKey: navigatorKey,
           initialRoute: '/',
           onGenerateRoute: _onGenerateRoute,
         );
+
+        // Wrap with shake detector only in debug builds
+        if (kDebugMode) {
+          app = ShakeDetectorWrapper(
+            navigatorKey: navigatorKey,
+            child: app,
+          );
+        }
+
+        return app;
       },
     );
   }
@@ -78,6 +96,10 @@ class MirageApp extends StatelessWidget {
         // Category-filtered catalog — navigates to shell with catalog tab
         return MaterialPageRoute(
           builder: (_) => AppShell(initialTab: 1),
+        );
+      case '/dev-settings':
+        return MaterialPageRoute(
+          builder: (_) => const DevSettingsScreen(),
         );
       default:
         return MaterialPageRoute(

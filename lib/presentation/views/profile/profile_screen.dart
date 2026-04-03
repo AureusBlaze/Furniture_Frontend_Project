@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
@@ -6,8 +8,39 @@ import 'package:mirage_by_aurues/presentation/viewmodels/auth_viewmodel.dart';
 
 /// Profile screen — user info, theme switcher, and logout.
 /// Shows login prompt if unauthenticated.
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _versionTapCount = 0;
+  Timer? _tapResetTimer;
+
+  void _onVersionTap() {
+    // Only active in debug mode
+    if (!kDebugMode) return;
+
+    _versionTapCount++;
+    _tapResetTimer?.cancel();
+    _tapResetTimer = Timer(const Duration(seconds: 3), () {
+      _versionTapCount = 0;
+    });
+
+    if (_versionTapCount >= 5) {
+      _versionTapCount = 0;
+      _tapResetTimer?.cancel();
+      Navigator.of(context).pushNamed('/dev-settings');
+    }
+  }
+
+  @override
+  void dispose() {
+    _tapResetTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +100,9 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 40),
             // Theme switcher (available without login)
             _buildThemeSection(context, theme),
+            const SizedBox(height: 24),
+            // Hidden version tap target
+            _buildVersionLabel(theme),
           ],
         ),
       ),
@@ -166,6 +202,11 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
+
+        const SizedBox(height: 16),
+
+        // Hidden version tap target (at bottom of profile)
+        _buildVersionLabel(theme),
       ],
     );
   }
@@ -267,6 +308,25 @@ class ProfileScreen extends StatelessWidget {
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.3),
           width: 0.5,
+        ),
+      ),
+    );
+  }
+
+  /// Version label that acts as a hidden 5-tap dev settings entry point.
+  Widget _buildVersionLabel(dynamic theme) {
+    return Center(
+      child: GestureDetector(
+        onTap: _onVersionTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Text(
+            'v1.0.0',
+            style: MirageTypography.caption(
+              color: theme.textSecondary.withValues(alpha: 0.35),
+            ),
+          ),
         ),
       ),
     );
