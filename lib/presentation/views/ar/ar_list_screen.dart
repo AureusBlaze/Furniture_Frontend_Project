@@ -41,12 +41,18 @@ class _ArListScreenState extends State<ArListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.view_in_ar, size: 48,
-                      color: theme.textOnDark.withValues(alpha: 0.5)),
+                  Icon(
+                    Icons.view_in_ar,
+                    size: 48,
+                    color: theme.textOnDark.withValues(alpha: 0.5),
+                  ),
                   const SizedBox(height: 16),
-                  Text('Unable to load AR products',
-                      style: MirageTypography.headingMedium(
-                          color: theme.textOnDark)),
+                  Text(
+                    'Unable to load AR products',
+                    style: MirageTypography.headingMedium(
+                      color: theme.textOnDark,
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: vm.loadArProducts,
@@ -62,16 +68,25 @@ class _ArListScreenState extends State<ArListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.view_in_ar_outlined, size: 64,
-                      color: theme.textOnDark.withValues(alpha: 0.2)),
+                  Icon(
+                    Icons.view_in_ar_outlined,
+                    size: 64,
+                    color: theme.textOnDark.withValues(alpha: 0.2),
+                  ),
                   const SizedBox(height: 16),
-                  Text('No AR products available',
-                      style: MirageTypography.headingMedium(
-                          color: theme.textOnDark)),
+                  Text(
+                    'No AR products available',
+                    style: MirageTypography.headingMedium(
+                      color: theme.textOnDark,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text('AR-enabled products will appear here',
-                      style: MirageTypography.bodyMedium(
-                          color: theme.textOnDark.withValues(alpha: 0.5))),
+                  Text(
+                    'AR-enabled products will appear here',
+                    style: MirageTypography.bodyMedium(
+                      color: theme.textOnDark.withValues(alpha: 0.5),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -79,7 +94,7 @@ class _ArListScreenState extends State<ArListScreen> {
 
           return GridView.builder(
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 80,
+              top: MediaQuery.of(context).padding.top,
               left: 16,
               right: 16,
               bottom: 100,
@@ -95,10 +110,9 @@ class _ArListScreenState extends State<ArListScreen> {
               final product = vm.products[index];
               return ProductCard(
                 product: product,
-                onTap: () => Navigator.of(context).pushNamed(
-                  '/product',
-                  arguments: product.id,
-                ),
+                onTap: () => Navigator.of(
+                  context,
+                ).pushNamed('/product', arguments: product.id),
               );
             },
           );

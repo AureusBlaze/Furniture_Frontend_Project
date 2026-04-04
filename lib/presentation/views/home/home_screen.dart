@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: theme.accent,
             child: ListView.builder(
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 80,
+                top: MediaQuery.of(context).padding.top,
                 left: 16,
                 right: 16,
                 bottom: 100,
@@ -62,15 +62,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'COLLECTIONS',
                         style: MirageTypography.displaySmall(
-                                color: theme.textOnDark)
-                            .copyWith(letterSpacing: 6),
+                          color: theme.textOnDark,
+                        ).copyWith(letterSpacing: 6),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Curated categories for your space',
                         style: MirageTypography.bodyMedium(
-                            color:
-                                theme.textOnDark.withValues(alpha: 0.6)),
+                          color: theme.textOnDark.withValues(alpha: 0.6),
+                        ),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -85,12 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     index: catIndex,
                     onTap: () {
                       context.read<CatalogViewModel>().loadProducts(
-                            categoryId: vm.categories[catIndex].id,
-                          );
-                      Navigator.of(context).pushReplacementNamed(
-                        '/shell',
-                        arguments: 1,
+                        categoryId: vm.categories[catIndex].id,
                       );
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed('/shell', arguments: 1);
                     },
                   ),
                 );
@@ -109,20 +108,22 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off,
-                size: 48,
-                color: theme.textOnDark.withValues(alpha: 0.5)),
+            Icon(
+              Icons.cloud_off,
+              size: 48,
+              color: theme.textOnDark.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'Unable to load categories',
-              style:
-                  MirageTypography.headingMedium(color: theme.textOnDark),
+              style: MirageTypography.headingMedium(color: theme.textOnDark),
             ),
             const SizedBox(height: 8),
             Text(
               vm.error!,
               style: MirageTypography.bodySmall(
-                  color: theme.textOnDark.withValues(alpha: 0.5)),
+                color: theme.textOnDark.withValues(alpha: 0.5),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

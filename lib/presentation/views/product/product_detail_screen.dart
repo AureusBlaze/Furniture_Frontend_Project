@@ -30,8 +30,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Scaffold(
-      backgroundColor: theme.surface,
+    return ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: theme.surface,
       body: Consumer<ProductDetailViewModel>(
         builder: (_, vm, __) {
           if (vm.isLoading) {
@@ -185,7 +186,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       RepaintBoundary(
                         child: Selector<CartViewModel, bool>(
                           selector: (_, vm) => vm.isBusy,
-                          builder: (_, isBusy, __) {
+                          builder: (innerContext, isBusy, __) {
                             return SizedBox(
                               width: double.infinity,
                               height: 56,
@@ -193,8 +194,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 onPressed: isBusy
                                     ? null
                                     : () async {
-                                        final cartVm = context.read<CartViewModel>();
-                                        final messenger = ScaffoldMessenger.of(context);
+                                        final cartVm = innerContext.read<CartViewModel>();
+                                        final messenger = ScaffoldMessenger.of(innerContext);
                                         final productName = product.name;
 
                                         try {
@@ -208,7 +209,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             ),
                                           );
 
-                                          if (!context.mounted) return;
+                                          if (!innerContext.mounted) return;
 
                                           messenger.clearSnackBars();
                                           messenger.showSnackBar(
@@ -226,11 +227,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
+                                              margin: const EdgeInsets.all(16),
                                             ),
                                           );
                                         } catch (e) {
                                           debugPrint('[ProductDetail] ❌ Add to cart error: $e');
-                                          if (!context.mounted) return;
+                                          if (!innerContext.mounted) return;
                                           messenger.clearSnackBars();
                                           messenger.showSnackBar(
                                             SnackBar(
@@ -240,6 +242,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
+                                              margin: const EdgeInsets.all(16),
                                             ),
                                           );
                                         }
@@ -269,7 +272,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           );
         },
       ),
-    );
+    ));
   }
 
   Widget _quantityButton(IconData icon, dynamic theme, VoidCallback onTap) {

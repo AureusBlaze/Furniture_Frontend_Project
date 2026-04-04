@@ -67,11 +67,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_outline, size: 64,
-                color: theme.textSecondary.withValues(alpha: 0.3)),
+            Icon(
+              Icons.person_outline,
+              size: 64,
+              color: theme.textSecondary.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 16),
-            Text('Welcome to Mirage',
-                style: MirageTypography.displaySmall(color: theme.textPrimary)),
+            Text(
+              'Welcome to Mirage',
+              style: MirageTypography.displaySmall(color: theme.textPrimary),
+            ),
             const SizedBox(height: 8),
             Text(
               'Sign in to access your profile and order history',
@@ -111,10 +116,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfile(
-      BuildContext context, AuthViewModel authVm, dynamic theme) {
+    BuildContext context,
+    AuthViewModel authVm,
+    dynamic theme,
+  ) {
     return ListView(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 80,
+        top: MediaQuery.of(context).padding.top,
         left: 20,
         right: 20,
         bottom: 100,
@@ -137,7 +145,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: theme.accentWarm,
                   child: Text(
                     authVm.user?.name.substring(0, 1).toUpperCase() ?? '?',
-                    style: MirageTypography.headingLarge(color: theme.textOnDark),
+                    style: MirageTypography.headingLarge(
+                      color: theme.textOnDark,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -235,7 +245,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        trailing: Icon(Icons.chevron_right, color: theme.textSecondary, size: 20),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: theme.textSecondary,
+          size: 20,
+        ),
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
@@ -258,10 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         subtitle: Text(
           context.watch<ThemeProvider>().currentTheme.name,
-          style: TextStyle(
-            color: theme.textSecondary,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: theme.textSecondary, fontSize: 12),
         ),
         trailing: Icon(Icons.chevron_right, color: theme.accent, size: 20),
         onTap: () => Navigator.of(context).pushNamed('/theme-config'),

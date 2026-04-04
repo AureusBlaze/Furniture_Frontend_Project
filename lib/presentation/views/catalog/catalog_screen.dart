@@ -64,7 +64,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 80,
+                    top: MediaQuery.of(context).padding.top,
                     left: 16,
                     right: 16,
                   ),
@@ -73,8 +73,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'FULL CATALOG',
@@ -84,15 +83,17 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             ),
                             TextButton.icon(
                               onPressed: () {},
-                              icon: Icon(Icons.tune,
-                                  size: 18,
-                                  color: theme.textOnDark
-                                      .withValues(alpha: 0.6)),
+                              icon: Icon(
+                                Icons.tune,
+                                size: 18,
+                                color: theme.textOnDark.withValues(alpha: 0.6),
+                              ),
                               label: Text(
                                 'FILTERS',
                                 style: MirageTypography.labelSmall(
-                                  color: theme.textOnDark
-                                      .withValues(alpha: 0.6),
+                                  color: theme.textOnDark.withValues(
+                                    alpha: 0.6,
+                                  ),
                                 ),
                               ),
                             ),
@@ -106,31 +107,27 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, index) {
-                        final product = vm.products[index];
-                        // RepaintBoundary isolates each card's blur
-                        return RepaintBoundary(
-                          child: ProductCard(
-                            product: product,
-                            onTap: () {
-                              Navigator.of(context).pushNamed(
-                                '/product',
-                                arguments: product.id,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      childCount: vm.products.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((_, index) {
+                      final product = vm.products[index];
+                      // RepaintBoundary isolates each card's blur
+                      return RepaintBoundary(
+                        child: ProductCard(
+                          product: product,
+                          onTap: () {
+                            Navigator.of(
+                              context,
+                            ).pushNamed('/product', arguments: product.id);
+                          },
+                        ),
+                      );
+                    }, childCount: vm.products.length),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.6,
-                    ),
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.6,
+                        ),
                   ),
                 ),
                 if (vm.isLoadingMore)
@@ -164,17 +161,23 @@ class _CatalogScreenState extends State<CatalogScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off,
-                size: 48,
-                color: theme.textOnDark.withValues(alpha: 0.5)),
+            Icon(
+              Icons.cloud_off,
+              size: 48,
+              color: theme.textOnDark.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
-            Text('Unable to load products',
-                style: MirageTypography.headingMedium(
-                    color: theme.textOnDark)),
+            Text(
+              'Unable to load products',
+              style: MirageTypography.headingMedium(color: theme.textOnDark),
+            ),
             const SizedBox(height: 8),
-            Text(vm.error!,
-                style: MirageTypography.bodySmall(
-                    color: theme.textOnDark.withValues(alpha: 0.5))),
+            Text(
+              vm.error!,
+              style: MirageTypography.bodySmall(
+                color: theme.textOnDark.withValues(alpha: 0.5),
+              ),
+            ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: vm.refresh,
