@@ -79,9 +79,8 @@ class CategoryCard extends StatelessWidget {
         height: double.infinity,
         // Memory-efficient: resize to expected display size
         memCacheWidth: 400,
-        placeholder: (_, __) => Container(
-          color: theme.surfaceVariant.withValues(alpha: 0.2),
-        ),
+        placeholder: (_, __) =>
+            Container(color: theme.surfaceVariant.withValues(alpha: 0.2)),
         errorWidget: (_, __, ___) => _buildImagePlaceholder(theme),
       );
     }
@@ -104,71 +103,62 @@ class CategoryCard extends StatelessWidget {
   Widget _buildGlassTextSection(dynamic theme) {
     return SizedBox(
       width: 160,
-      child: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            color: theme.primaryDark.withValues(alpha: 0.5),
-            child: Column(
-              crossAxisAlignment: _isReversed
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.center,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        color: theme.primaryDark.withValues(alpha: 0.7),
+        child: Column(
+          crossAxisAlignment: _isReversed
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              category.name.toUpperCase(),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: theme.textOnDark,
+                letterSpacing: 2,
+                fontFamily: 'PlayfairDisplay',
+              ),
+              textAlign: _isReversed ? TextAlign.left : TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            if (category.description != null)
+              Text(
+                category.description!,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.textOnDark.withValues(alpha: 0.6),
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: _isReversed ? TextAlign.left : TextAlign.right,
+              ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: _isReversed
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  category.name.toUpperCase(),
+                  'EXPLORE',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: theme.textOnDark,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: theme.accent,
                     letterSpacing: 2,
-                    fontFamily: 'PlayfairDisplay',
                   ),
-                  textAlign: _isReversed ? TextAlign.left : TextAlign.right,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
-                if (category.description != null)
-                  Text(
-                    category.description!,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.textOnDark.withValues(alpha: 0.6),
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: _isReversed ? TextAlign.left : TextAlign.right,
-                  ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: _isReversed
-                      ? MainAxisAlignment.start
-                      : MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'EXPLORE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: theme.accent,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 12,
-                      color: theme.accent,
-                    ),
-                  ],
-                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward, size: 12, color: theme.accent),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
