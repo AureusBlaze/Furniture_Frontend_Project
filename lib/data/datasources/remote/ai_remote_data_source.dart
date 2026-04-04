@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mirage_by_aurues/core/error/exceptions.dart';
 import 'package:mirage_by_aurues/core/network/api_client.dart';
 import 'package:mirage_by_aurues/core/network/api_endpoints.dart';
@@ -29,12 +31,22 @@ class AiRemoteDataSource {
         ),
       );
 
-      final data = response.data;
+      dynamic data = response.data;
+      if (data is String) {
+        try {
+          data = jsonDecode(data);
+        } catch (_) {}
+      }
+
+      debugPrint('[AI] Raw response type: ${data.runtimeType}');
+      debugPrint('[AI] Raw response: $data');
+
       List<dynamic> items;
 
       if (data is Map && data.containsKey('suggestions')) {
         // Backend returns: { "detected_tags": [...], "suggestions": { "data": [...] } }
         final suggestions = data['suggestions'];
+        debugPrint('[AI] suggestions type: ${suggestions.runtimeType}');
         if (suggestions is Map && suggestions.containsKey('data')) {
           items = suggestions['data'] as List;
         } else if (suggestions is List) {
@@ -49,13 +61,26 @@ class AiRemoteDataSource {
       } else if (data is List) {
         items = data;
       } else {
+        debugPrint('[AI] Could not find items in data. Defaulting to empty list.');
         items = [];
       }
 
+      debugPrint('[AI] Parsed ${items.length} product items');
+
       return items
-          .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
+          .map((json) {
+            try {
+              return ProductModel.fromJson(Map<String, dynamic>.from(json as Map));
+            } catch (e, st) {
+              debugPrint('[AI] Error parsing product: $e\n$st');
+              return null;
+            }
+          })
+          .whereType<ProductModel>()
           .toList();
     } on DioException catch (e) {
+      debugPrint('[AI] DioException: ${e.message}');
+      debugPrint('[AI] Response data: ${e.response?.data}');
       throw ServerException(
         e.response?.data?['message'] ?? 'AI analysis failed',
         statusCode: e.response?.statusCode,
