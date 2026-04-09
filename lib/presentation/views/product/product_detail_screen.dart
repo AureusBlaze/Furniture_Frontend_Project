@@ -152,6 +152,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ).copyWith(fontSize: 28),
                       ),
                       const SizedBox(height: 24),
+
                       Text(
                         product.description,
                         style: MirageTypography.bodyLarge(
@@ -191,81 +192,107 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         child: Selector<CartViewModel, bool>(
                           selector: (_, vm) => vm.isBusy,
                           builder: (innerContext, isBusy, __) {
-                            return SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton.icon(
-                                onPressed: isBusy
-                                    ? null
-                                    : () async {
-                                        final cartVm = innerContext.read<CartViewModel>();
-                                        final messenger = ScaffoldMessenger.of(innerContext);
-                                        final productName = product.name;
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 56,
+                                    child: ElevatedButton.icon(
+                                      onPressed: isBusy
+                                          ? null
+                                          : () async {
+                                              final cartVm = innerContext.read<CartViewModel>();
+                                              final messenger = ScaffoldMessenger.of(innerContext);
+                                              final productName = product.name;
 
-                                        try {
-                                          final success = await cartVm.addToCart(
-                                            CartItem(
-                                              productId: product.id,
-                                              name: productName,
-                                              price: product.price,
-                                              imageUrl: product.imageUrl,
-                                              quantity: vm.quantity,
-                                            ),
-                                          );
+                                              try {
+                                                final success = await cartVm.addToCart(
+                                                  CartItem(
+                                                    productId: product.id,
+                                                    name: productName,
+                                                    price: product.price,
+                                                    imageUrl: product.imageUrl,
+                                                    quantity: vm.quantity,
+                                                  ),
+                                                );
 
-                                          if (!innerContext.mounted) return;
-                                          if (ModalRoute.of(innerContext)?.isCurrent != true) return;
+                                                if (!innerContext.mounted) return;
+                                                if (ModalRoute.of(innerContext)?.isCurrent != true) return;
 
-                                          messenger.clearSnackBars();
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                success
-                                                    ? '$productName added to cart'
-                                                    : 'Could not add to cart — please try again',
+                                                messenger.clearSnackBars();
+                                                messenger.showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      success
+                                                          ? '$productName added to cart'
+                                                          : 'Could not add to cart — please try again',
+                                                    ),
+                                                    backgroundColor: success
+                                                        ? theme.primaryDark
+                                                        : theme.error,
+                                                    behavior: SnackBarBehavior.floating,
+                                                    duration: const Duration(seconds: 2),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    margin: const EdgeInsets.all(16),
+                                                  ),
+                                                );
+                                              } catch (e) {
+                                                debugPrint('[ProductDetail] ❌ Add to cart error: $e');
+                                                if (!innerContext.mounted) return;
+                                                if (ModalRoute.of(innerContext)?.isCurrent != true) return;
+                                                
+                                                messenger.clearSnackBars();
+                                                messenger.showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Error: $e'),
+                                                    backgroundColor: theme.error,
+                                                    behavior: SnackBarBehavior.floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    margin: const EdgeInsets.all(16),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                      icon: isBusy
+                                          ? SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: theme.textOnDark,
                                               ),
-                                              backgroundColor: success
-                                                  ? theme.primaryDark
-                                                  : theme.error,
-                                              behavior: SnackBarBehavior.floating,
-                                              duration: const Duration(seconds: 2),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              margin: const EdgeInsets.all(16),
-                                            ),
-                                          );
-                                        } catch (e) {
-                                          debugPrint('[ProductDetail] ❌ Add to cart error: $e');
-                                          if (!innerContext.mounted) return;
-                                          if (ModalRoute.of(innerContext)?.isCurrent != true) return;
-                                          
-                                          messenger.clearSnackBars();
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text('Error: $e'),
-                                              backgroundColor: theme.error,
-                                              behavior: SnackBarBehavior.floating,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              margin: const EdgeInsets.all(16),
-                                            ),
-                                          );
-                                        }
+                                            )
+                                          : const Icon(Icons.shopping_bag_outlined),
+                                      label: Text(isBusy ? 'ADDING...' : 'ADD TO CART'),
+                                    ),
+                                  ),
+                                ),
+                                if (product.hasArModel) ...[
+                                  const SizedBox(width: 16),
+                                  SizedBox(
+                                    height: 56,
+                                    width: 56,
+                                    child: OutlinedButton(
+                                      onPressed: () {
+                                        debugPrint('3D Preview Tapped');
                                       },
-                                icon: isBusy
-                                    ? SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: theme.textOnDark,
+                                      style: OutlinedButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        side: BorderSide(color: theme.accent, width: 1.5),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
-                                      )
-                                    : const Icon(Icons.shopping_bag_outlined),
-                                label: Text(isBusy ? 'ADDING...' : 'ADD TO CART'),
-                              ),
+                                        backgroundColor: theme.accent.withValues(alpha: 0.1),
+                                      ),
+                                      child: Icon(Icons.view_in_ar_outlined, color: theme.accent),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             );
                           },
                         ),

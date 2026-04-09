@@ -86,8 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     category: vm.categories[catIndex],
                     index: catIndex,
                     onTap: () {
-                      context.read<CatalogViewModel>().loadProducts(
-                        categoryId: vm.categories[catIndex].id,
+                      final cat = vm.categories[catIndex];
+                      context.read<CatalogViewModel>().setCategory(
+                        cat.id,
+                        cat.name,
                       );
                       Navigator.of(
                         context,

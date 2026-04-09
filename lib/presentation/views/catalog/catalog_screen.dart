@@ -24,7 +24,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CatalogViewModel>().loadProducts();
+      final vm = context.read<CatalogViewModel>();
+      vm.loadCategories();
+      vm.loadProducts();
     });
     _scrollController.addListener(_onScroll);
   }
@@ -40,6 +42,34 @@ class _CatalogScreenState extends State<CatalogScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // ─── Filter Bottom Sheet ──────────────────────────────────────────
+  void _showFilterSheet(BuildContext context) {
+    final theme = context.read<ThemeProvider>().currentTheme;
+    final vm = context.read<CatalogViewModel>();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) {
+        return _FilterSheet(
+          theme: theme,
+          categories: vm.categories,
+          selectedCategoryId: vm.selectedCategoryId,
+          isCategoriesLoading: vm.isCategoriesLoading,
+          onCategorySelected: (id, name) {
+            Navigator.of(context).pop();
+            vm.setCategory(id, name);
+          },
+          onClearFilter: () {
+            Navigator.of(context).pop();
+            vm.clearFilter();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -74,30 +104,59 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'FULL CATALOG',
-                              style: MirageTypography.displaySmall(
-                                color: theme.textOnDark,
-                              ).copyWith(letterSpacing: 4),
-                            ),
-                            TextButton.icon(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.tune,
-                                size: 18,
-                                color: theme.textOnDark.withValues(alpha: 0.6),
-                              ),
-                              label: Text(
-                                'FILTERS',
-                                style: MirageTypography.labelSmall(
-                                  color: theme.textOnDark.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                ),
+                            Expanded(
+                              child: Text(
+                                vm.hasActiveFilter
+                                    ? (vm.selectedCategoryName?.toUpperCase() ?? 'FILTERED')
+                                    : 'FULL CATALOG',
+                                style: MirageTypography.displaySmall(
+                                  color: theme.textOnDark,
+                                ).copyWith(letterSpacing: 4),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 8),
+                            _buildFilterButton(theme, vm),
                           ],
                         ),
+                        // Active filter clear chip
+                        if (vm.hasActiveFilter) ...[
+                          const SizedBox(height: 10),
+                          GestureDetector(
+                            onTap: vm.clearFilter,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.accentWarm.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: theme.accentWarm.withValues(alpha: 0.4),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    vm.selectedCategoryName?.toUpperCase() ?? 'FILTER',
+                                    style: MirageTypography.labelSmall(
+                                      color: theme.textOnDark,
+                                    ).copyWith(letterSpacing: 1.5),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.close,
+                                    size: 14,
+                                    color: theme.textOnDark.withValues(alpha: 0.7),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -152,6 +211,53 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
+  // ─── Filter Button with active indicator ──────────────────────────
+  Widget _buildFilterButton(dynamic theme, CatalogViewModel vm) {
+    return Stack(
+      children: [
+        TextButton.icon(
+          onPressed: () => _showFilterSheet(context),
+          icon: Icon(
+            Icons.tune,
+            size: 18,
+            color: vm.hasActiveFilter
+                ? theme.accent
+                : theme.textOnDark.withValues(alpha: 0.6),
+          ),
+          label: Text(
+            'FILTERS',
+            style: MirageTypography.labelSmall(
+              color: vm.hasActiveFilter
+                  ? theme.accent
+                  : theme.textOnDark.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        // Active filter dot
+        if (vm.hasActiveFilter)
+          Positioned(
+            right: 4,
+            top: 4,
+            child: Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: theme.accent,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.accent.withValues(alpha: 0.5),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildError(CatalogViewModel vm, dynamic theme) {
     return Center(
       child: Padding(
@@ -186,6 +292,154 @@ class _CatalogScreenState extends State<CatalogScreen> {
               child: const Text('RETRY'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Filter Bottom Sheet (stateless, receives data) ─────────────────
+class _FilterSheet extends StatelessWidget {
+  final dynamic theme;
+  final List categories;
+  final int? selectedCategoryId;
+  final bool isCategoriesLoading;
+  final void Function(int id, String name) onCategorySelected;
+  final VoidCallback onClearFilter;
+
+  const _FilterSheet({
+    required this.theme,
+    required this.categories,
+    required this.selectedCategoryId,
+    required this.isCategoriesLoading,
+    required this.onCategorySelected,
+    required this.onClearFilter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.55,
+      ),
+      decoration: BoxDecoration(
+        color: theme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Padding(
+            padding: const EdgeInsets.only(top: 14, bottom: 8),
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.surfaceVariant.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+            child: Row(
+              children: [
+                Text(
+                  'FILTER BY CATEGORY',
+                  style: MirageTypography.headingSmall(
+                    color: theme.textPrimary,
+                  ).copyWith(letterSpacing: 3),
+                ),
+                const Spacer(),
+                if (selectedCategoryId != null)
+                  GestureDetector(
+                    onTap: onClearFilter,
+                    child: Text(
+                      'CLEAR',
+                      style: MirageTypography.labelSmall(
+                        color: theme.accent,
+                      ).copyWith(letterSpacing: 1.5),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Divider
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 28),
+            height: 0.5,
+            color: theme.surfaceVariant.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 20),
+          // Category grid
+          if (isCategoriesLoading)
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: theme.accent,
+              ),
+            )
+          else
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: categories.map((cat) {
+                    final isSelected = cat.id == selectedCategoryId;
+                    return _buildCategoryChip(cat, isSelected);
+                  }).toList(),
+                ),
+              ),
+            ),
+          const SizedBox(height: 28),
+          // Bottom safe area
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(dynamic category, bool isSelected) {
+    return GestureDetector(
+      onTap: () => onCategorySelected(category.id, category.name),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.accentWarm
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? theme.accentWarm
+                : theme.surfaceVariant.withValues(alpha: 0.5),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          category.name.toUpperCase(),
+          style: MirageTypography.labelSmall(
+            color: isSelected
+                ? theme.textOnDark
+                : theme.textSecondary,
+          ).copyWith(
+            letterSpacing: 2,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          ),
         ),
       ),
     );

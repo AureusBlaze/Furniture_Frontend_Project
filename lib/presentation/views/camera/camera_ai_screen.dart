@@ -37,8 +37,9 @@ class CameraAiScreen extends StatelessWidget {
         ),
         title: Text(
           'AI ROOM ANALYSIS',
-          style: MirageTypography.labelLarge(color: theme.textOnDark)
-              .copyWith(letterSpacing: 4),
+          style: MirageTypography.labelLarge(
+            color: theme.textOnDark,
+          ).copyWith(letterSpacing: 4),
         ),
         centerTitle: true,
       ),
@@ -75,7 +76,10 @@ class CameraAiScreen extends StatelessWidget {
   }
 
   Widget _buildImageSection(
-      BuildContext context, CameraViewModel vm, dynamic theme) {
+    BuildContext context,
+    CameraViewModel vm,
+    dynamic theme,
+  ) {
     if (vm.capturedImage != null) {
       return AnimatedBorder(
         borderRadius: 20,
@@ -104,8 +108,11 @@ class CameraAiScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.camera_alt_outlined, size: 64,
-                  color: theme.textOnDark.withValues(alpha: 0.5)),
+              Icon(
+                Icons.camera_alt_outlined,
+                size: 64,
+                color: theme.textOnDark.withValues(alpha: 0.5),
+              ),
               const SizedBox(height: 16),
               Text(
                 'CAPTURE YOUR ROOM',
@@ -157,10 +164,13 @@ class CameraAiScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: Icon(Icons.camera_alt, color: theme.accent),
-                  title: Text('Camera',
-                      style: TextStyle(color: theme.textOnDark)),
+                  title: Text(
+                    'Camera',
+                    style: TextStyle(color: theme.textOnDark),
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     vm.captureFromCamera();
@@ -173,10 +183,13 @@ class CameraAiScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: ListTile(
                   leading: Icon(Icons.photo_library, color: theme.accent),
-                  title: Text('Gallery',
-                      style: TextStyle(color: theme.textOnDark)),
+                  title: Text(
+                    'Gallery',
+                    style: TextStyle(color: theme.textOnDark),
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     vm.pickFromGallery();
@@ -198,13 +211,16 @@ class CameraAiScreen extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: vm.reset,
             icon: Icon(Icons.refresh, color: theme.textOnDark, size: 18),
-            label: Text('RETAKE',
-                style: TextStyle(color: theme.textOnDark, letterSpacing: 1)),
+            label: Text(
+              'RETAKE',
+              style: TextStyle(color: theme.textOnDark, letterSpacing: 1),
+            ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.accentWarm),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
@@ -220,7 +236,8 @@ class CameraAiScreen extends StatelessWidget {
               foregroundColor: theme.textOnDark,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
@@ -268,15 +285,19 @@ class CameraAiScreen extends StatelessWidget {
   }
 
   Widget _buildSuggestions(
-      BuildContext context, CameraViewModel vm, dynamic theme) {
+    BuildContext context,
+    CameraViewModel vm,
+    dynamic theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 24),
         Text(
           'SUGGESTED FURNITURE',
-          style: MirageTypography.labelLarge(color: theme.textOnDark)
-              .copyWith(letterSpacing: 3),
+          style: MirageTypography.labelLarge(
+            color: theme.textOnDark,
+          ).copyWith(letterSpacing: 3),
         ),
         const SizedBox(height: 4),
         Text(
@@ -289,6 +310,7 @@ class CameraAiScreen extends StatelessWidget {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(vertical: 0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: 16,
@@ -301,10 +323,9 @@ class CameraAiScreen extends StatelessWidget {
             return RepaintBoundary(
               child: ProductCard(
                 product: product,
-                onTap: () => Navigator.of(context).pushNamed(
-                  '/product',
-                  arguments: product.id,
-                ),
+                onTap: () => Navigator.of(
+                  context,
+                ).pushNamed('/product', arguments: product.id),
               ),
             );
           },

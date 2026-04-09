@@ -87,7 +87,7 @@ Future<void> initServiceLocator() async {
   // ─── ViewModels ──────────────────────────────────────────────────
   sl.registerFactory(() => AuthViewModel(sl<AuthRepository>()));
   sl.registerFactory(() => HomeViewModel(sl<CategoryRepository>()));
-  sl.registerFactory(() => CatalogViewModel(sl<ProductRepository>()));
+  sl.registerFactory(() => CatalogViewModel(sl<ProductRepository>(), sl<CategoryRepository>()));
   sl.registerFactory(() => ProductDetailViewModel(sl<ProductRepository>()));
   sl.registerFactory(() => CartViewModel(sl<CartRepository>()));
   sl.registerFactory(
