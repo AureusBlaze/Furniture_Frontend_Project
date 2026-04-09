@@ -4,6 +4,7 @@ import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/checkout_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 
 /// Checkout screen — shipping address form and order placement.
 class CheckoutScreen extends StatefulWidget {
@@ -34,7 +35,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final theme = context.watch<ThemeProvider>().currentTheme;
     final cartVm = context.read<CartViewModel>();
 
-    return Scaffold(
+    return AureusNavigationGuard(
+      child: Scaffold(
       backgroundColor: theme.surface,
       appBar: AppBar(
         backgroundColor: theme.surface,
@@ -151,7 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           );
         },
       ),
-    );
+    ));
   }
 
   Widget _buildField(

@@ -6,6 +6,8 @@ import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/domain/entities/cart_item.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/product_detail_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
 
 /// Product detail screen — hero image, info, and add to cart.
 class ProductDetailScreen extends StatefulWidget {
@@ -31,7 +33,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
     return ScaffoldMessenger(
-      child: Scaffold(
+      child: AureusNavigationGuard(
+        child: Scaffold(
         backgroundColor: theme.surface,
       body: Consumer<ProductDetailViewModel>(
         builder: (_, vm, __) {
@@ -63,7 +66,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           final product = vm.product;
           if (product == null) return const SizedBox.shrink();
 
-          return CustomScrollView(
+          return AureusRefreshWrapper(
+            onRefresh: () async => context.read<ProductDetailViewModel>().loadProduct(widget.productId),
             slivers: [
               // Hero image
               SliverAppBar(
@@ -210,6 +214,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           );
 
                                           if (!innerContext.mounted) return;
+                                          if (ModalRoute.of(innerContext)?.isCurrent != true) return;
 
                                           messenger.clearSnackBars();
                                           messenger.showSnackBar(
@@ -233,6 +238,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         } catch (e) {
                                           debugPrint('[ProductDetail] ❌ Add to cart error: $e');
                                           if (!innerContext.mounted) return;
+                                          if (ModalRoute.of(innerContext)?.isCurrent != true) return;
+                                          
                                           messenger.clearSnackBars();
                                           messenger.showSnackBar(
                                             SnackBar(
@@ -272,7 +279,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           );
         },
       ),
-    ));
+    )));
   }
 
   Widget _quantityButton(IconData icon, dynamic theme, VoidCallback onTap) {

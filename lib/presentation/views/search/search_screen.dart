@@ -7,6 +7,7 @@ import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 import 'package:mirage_by_aurues/presentation/widgets/animated_border.dart';
 import 'package:mirage_by_aurues/presentation/widgets/bevel_container.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 
 /// Full-screen search overlay with animated themed border.
 /// Consistent bevel containers that match the design system.
@@ -40,7 +41,8 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Scaffold(
+    return AureusNavigationGuard(
+      child: Scaffold(
       extendBodyBehindAppBar: true,
       body: BackgroundLayer(
         child: SafeArea(
@@ -213,6 +215,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

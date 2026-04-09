@@ -7,6 +7,7 @@ import 'package:mirage_by_aurues/presentation/viewmodels/catalog_viewmodel.dart'
 import 'package:mirage_by_aurues/presentation/widgets/category_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
 
 /// Home screen — vertical list of alternating category cards on background.
 /// Each category card is wrapped in RepaintBoundary for scroll perf.
@@ -41,20 +42,21 @@ class _HomeScreenState extends State<HomeScreen> {
             return _buildError(vm, theme);
           }
 
-          return RefreshIndicator(
+          return AureusRefreshWrapper(
             onRefresh: vm.loadCategories,
-            color: theme.accent,
-            child: ListView.builder(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-                left: 16,
-                right: 16,
-                bottom: 100,
-              ),
-              // +1 for header
-              itemCount: vm.categories.length + 1,
-              itemBuilder: (_, index) {
-                // Header
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top,
+                  left: 16,
+                  right: 16,
+                  bottom: 100,
+                ),
+                sliver: SliverList.builder(
+                  // +1 for header
+                  itemCount: vm.categories.length + 1,
+                  itemBuilder: (_, index) {
+                    // Header
                 if (index == 0) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,6 +97,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+          ),
+            ],
           );
         },
       ),

@@ -9,26 +9,26 @@ class CartRepositoryImpl implements CartRepository {
 
   @override
   Future<List<CartItem>> getCartItems() async {
-    return _localDataSource.getCartItems();
+    return Future.microtask(() => _localDataSource.getCartItems());
   }
 
   @override
   Future<void> addItem(CartItem item) async {
-    _localDataSource.addItem(item);
+    return Future.microtask(() => _localDataSource.addItem(item));
   }
 
   @override
   Future<void> updateQuantity(int productId, int quantity) async {
-    _localDataSource.updateQuantity(productId, quantity);
+    return Future.microtask(() => _localDataSource.updateQuantity(productId, quantity));
   }
 
   @override
   Future<void> removeItem(int productId) async {
-    _localDataSource.removeItem(productId);
+    return Future.microtask(() => _localDataSource.removeItem(productId));
   }
 
   @override
   Future<void> clearCart() async {
-    _localDataSource.clearCart();
+    return Future.microtask(() => _localDataSource.clearCart());
   }
 }

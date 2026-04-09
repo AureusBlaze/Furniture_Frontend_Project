@@ -7,6 +7,8 @@ import 'package:mirage_by_aurues/domain/entities/cart_item.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 import 'package:mirage_by_aurues/presentation/widgets/bevel_container.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
 
 /// Cart screen — full Mirage aesthetic: glass background, beveled containers,
 /// solid color buttons, consistent typography.
@@ -17,7 +19,8 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
 
-    return Scaffold(
+    return AureusNavigationGuard(
+      child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -51,24 +54,31 @@ class CartScreen extends StatelessWidget {
             return Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top,
-                      left: 20,
-                      right: 20,
-                      bottom: 16,
-                    ),
-                    itemCount: vm.items.length,
-                    itemBuilder: (_, index) {
-                      return RepaintBoundary(
-                        child: _buildCartItem(
-                          context,
-                          vm,
-                          vm.items[index],
-                          theme,
+                  child: AureusRefreshWrapper(
+                    onRefresh: () async => context.read<CartViewModel>().loadCart(),
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).padding.top + kToolbarHeight + 16,
+                          left: 20,
+                          right: 20,
+                          bottom: 16,
                         ),
-                      );
-                    },
+                        sliver: SliverList.builder(
+                          itemCount: vm.items.length,
+                          itemBuilder: (_, index) {
+                            return RepaintBoundary(
+                              child: _buildCartItem(
+                                context,
+                                vm,
+                                vm.items[index],
+                                theme,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 _buildBottomTotal(context, vm, theme),
@@ -77,7 +87,7 @@ class CartScreen extends StatelessWidget {
           },
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildEmptyCart(BuildContext context, dynamic theme) {
@@ -179,6 +189,7 @@ class CartScreen extends StatelessWidget {
               // Info
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -205,6 +216,7 @@ class CartScreen extends StatelessWidget {
               ),
               // Quantity controls
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _quantityButton(
                     icon: Icons.add,
@@ -301,6 +313,7 @@ class CartScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: SafeArea(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

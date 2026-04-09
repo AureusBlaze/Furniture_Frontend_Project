@@ -6,6 +6,7 @@ import 'package:mirage_by_aurues/presentation/viewmodels/catalog_viewmodel.dart'
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
 
 /// Catalog screen — 2-column product grid with pagination on background.
 /// Each product card is wrapped in RepaintBoundary for scroll perf.
@@ -56,12 +57,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
             return _buildError(vm, theme);
           }
 
-          return RefreshIndicator(
+          return AureusRefreshWrapper(
             onRefresh: vm.refresh,
-            color: theme.accent,
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
+            controller: _scrollController,
+            slivers: [
                 SliverPadding(
                   padding: EdgeInsets.only(
                     top: MediaQuery.of(context).padding.top,
@@ -147,7 +146,6 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
               ],
-            ),
           );
         },
       ),

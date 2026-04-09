@@ -14,12 +14,20 @@ class CartViewModel extends ChangeNotifier {
   bool _disposed = false;
   bool _pendingNotify = false;
 
+  int _itemCount = 0;
+  double _totalAmount = 0.0;
+
   List<CartItem> get items => _items;
   bool get isLoading => _isLoading;
   bool get isBusy => _isBusy;
   String? get error => _error;
-  int get itemCount => _items.fold(0, (sum, item) => sum + item.quantity);
-  double get totalAmount => _items.fold(0.0, (sum, item) => sum + item.total);
+  int get itemCount => _itemCount;
+  double get totalAmount => _totalAmount;
+
+  void _recalculateTotals() {
+    _itemCount = _items.fold(0, (sum, item) => sum + item.quantity);
+    _totalAmount = _items.fold(0.0, (sum, item) => sum + item.total);
+  }
 
   /// Schedules a single notification per frame.
   ///
@@ -45,6 +53,7 @@ class CartViewModel extends ChangeNotifier {
 
     try {
       _items = await _cartRepository.getCartItems();
+      _recalculateTotals();
       _error = null;
     } catch (e, stack) {
       debugPrint('[CartViewModel] loadCart error: $e\n$stack');
@@ -75,6 +84,7 @@ class CartViewModel extends ChangeNotifier {
 
       await _cartRepository.addItem(item);
       _items = await _cartRepository.getCartItems();
+      _recalculateTotals();
 
       debugPrint('[CartViewModel] Cart now has ${_items.length} unique items, '
           '$itemCount total units');
@@ -104,6 +114,7 @@ class CartViewModel extends ChangeNotifier {
     try {
       await _cartRepository.updateQuantity(productId, quantity);
       _items = await _cartRepository.getCartItems();
+      _recalculateTotals();
     } catch (e, stack) {
       debugPrint('[CartViewModel] updateQuantity error: $e\n$stack');
       _error = 'Failed to update quantity: $e';
@@ -120,6 +131,7 @@ class CartViewModel extends ChangeNotifier {
     try {
       await _cartRepository.removeItem(productId);
       _items = await _cartRepository.getCartItems();
+      _recalculateTotals();
     } catch (e, stack) {
       debugPrint('[CartViewModel] removeItem error: $e\n$stack');
       _error = 'Failed to remove item: $e';
@@ -136,6 +148,7 @@ class CartViewModel extends ChangeNotifier {
     try {
       await _cartRepository.clearCart();
       _items = [];
+      _recalculateTotals();
     } catch (e, stack) {
       debugPrint('[CartViewModel] clearCart error: $e\n$stack');
       _error = 'Failed to clear cart: $e';

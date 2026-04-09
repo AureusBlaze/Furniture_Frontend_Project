@@ -4,6 +4,7 @@ import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/camera_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 import 'package:mirage_by_aurues/presentation/widgets/glassmorphic_container.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 import 'package:mirage_by_aurues/presentation/widgets/animated_border.dart';

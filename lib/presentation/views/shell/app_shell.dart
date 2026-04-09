@@ -5,6 +5,7 @@ import 'package:mirage_by_aurues/presentation/views/home/home_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/catalog/catalog_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/ar/ar_list_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/profile/profile_screen.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 
 /// App Shell — hosts TopBar + BottomNav + body via IndexedStack.
 /// Performance: Screens are created once in initState (not re-allocated per
@@ -41,7 +42,8 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AureusNavigationGuard(
+      child: Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
       appBar: MirageTopBar(
@@ -59,6 +61,6 @@ class _AppShellState extends State<AppShell> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
       ),
-    );
+    ));
   }
 }
