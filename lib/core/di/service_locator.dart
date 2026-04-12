@@ -30,6 +30,7 @@ import 'package:mirage_by_aurues/presentation/viewmodels/checkout_viewmodel.dart
 import 'package:mirage_by_aurues/presentation/viewmodels/search_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/ar_list_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/camera_viewmodel.dart';
+import 'package:mirage_by_aurues/presentation/viewmodels/order_history_viewmodel.dart';
 
 final sl = GetIt.instance;
 
@@ -96,4 +97,5 @@ Future<void> initServiceLocator() async {
   sl.registerFactory(() => SearchViewModel(sl<ProductRepository>()));
   sl.registerFactory(() => ArListViewModel(sl<ProductRepository>()));
   sl.registerFactory(() => CameraViewModel(sl<AiRepository>()));
+  sl.registerFactory(() => OrderHistoryViewModel(sl<OrderRepository>()));
 }

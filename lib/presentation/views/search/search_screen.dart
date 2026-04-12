@@ -57,14 +57,14 @@ class _SearchScreenState extends State<SearchScreen> {
                     BevelContainer(
                       isCircular: true,
                       backgroundColor:
-                          theme.primaryDark.withValues(alpha: 0.85),
+                          (theme.brightness == Brightness.dark ? theme.primaryDark : theme.surface).withValues(alpha: 0.85),
                       padding: EdgeInsets.zero,
                       child: SizedBox(
                         width: 44,
                         height: 44,
                         child: IconButton(
                           icon: Icon(Icons.arrow_back,
-                              color: theme.textOnDark, size: 20),
+                              color: theme.brightness == Brightness.dark ? theme.textOnDark : theme.textPrimary, size: 20),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),

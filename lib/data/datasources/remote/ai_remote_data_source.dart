@@ -7,13 +7,21 @@ import 'package:mirage_by_aurues/core/network/api_client.dart';
 import 'package:mirage_by_aurues/core/network/api_endpoints.dart';
 import 'package:mirage_by_aurues/data/models/product_model.dart';
 
+/// Response container for the AI suggest endpoint.
+class AiSuggestResponse {
+  final List<ProductModel> products;
+  final String? description;
+
+  AiSuggestResponse({required this.products, this.description});
+}
+
 class AiRemoteDataSource {
   final ApiClient _apiClient;
 
   AiRemoteDataSource(this._apiClient);
 
   /// Upload a room image to the AI endpoint and get product suggestions.
-  Future<List<ProductModel>> getSuggestions(File image) async {
+  Future<AiSuggestResponse> getSuggestions(File image) async {
     try {
       final formData = FormData.fromMap({
         'image': await MultipartFile.fromFile(
@@ -41,6 +49,13 @@ class AiRemoteDataSource {
       debugPrint('[AI] Raw response type: ${data.runtimeType}');
       debugPrint('[AI] Raw response: $data');
 
+      // ─── Extract description ──────────────────────────────────────
+      String? description;
+      if (data is Map && data.containsKey('description')) {
+        description = data['description'] as String?;
+      }
+
+      // ─── Extract product suggestions ──────────────────────────────
       List<dynamic> items;
 
       if (data is Map && data.containsKey('suggestions')) {
@@ -66,8 +81,9 @@ class AiRemoteDataSource {
       }
 
       debugPrint('[AI] Parsed ${items.length} product items');
+      debugPrint('[AI] Description: ${description ?? 'none'}');
 
-      return items
+      final products = items
           .map((json) {
             try {
               return ProductModel.fromJson(Map<String, dynamic>.from(json as Map));
@@ -78,6 +94,11 @@ class AiRemoteDataSource {
           })
           .whereType<ProductModel>()
           .toList();
+
+      return AiSuggestResponse(
+        products: products,
+        description: description,
+      );
     } on DioException catch (e) {
       debugPrint('[AI] DioException: ${e.message}');
       debugPrint('[AI] Response data: ${e.response?.data}');

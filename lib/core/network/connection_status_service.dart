@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:mirage_by_aurues/core/network/api_client.dart';
+import 'package:mirage_by_aurues/core/network/api_endpoints.dart';
 
 /// Centralized connectivity service that determines online/offline status
 /// based on **actual backend reachability**, not just local Wi-Fi state.
@@ -26,7 +27,7 @@ class ConnectionStatusService extends ChangeNotifier {
   static const _freshnessWindow = Duration(seconds: 30);
 
   /// Polling interval for the background health-check.
-  static const _pollInterval = Duration(seconds: 15);
+  static const _pollInterval = Duration(seconds: 10);
 
   bool get isOnline => _isOnline;
   bool get isChecking => _isChecking;
@@ -73,13 +74,14 @@ class ConnectionStatusService extends ChangeNotifier {
   }
 
   Future<void> _ping() async {
-    // If we received a successful response recently, skip the ping
-    // to avoid unnecessary network traffic.
-    if (_lastSuccessAt != null &&
+    // Only skip the ping if we are ALREADY online and had a recent
+    // successful response.  When `_isOnline` is false the ping must
+    // always fire so the indicator recovers promptly.
+    if (_isOnline &&
+        _lastSuccessAt != null &&
         DateTime.now().difference(_lastSuccessAt!) < _freshnessWindow) {
       if (_isChecking) {
         _isChecking = false;
-        _isOnline = true;
         notifyListeners();
       }
       return;
@@ -87,7 +89,7 @@ class ConnectionStatusService extends ChangeNotifier {
 
     try {
       final response = await _apiClient.dio.get(
-        '/api/v1/categories',
+        ApiEndpoints.categories,
         options: Options(
           sendTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 5),

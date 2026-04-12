@@ -130,8 +130,7 @@ class ProductCard extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        // Memory-efficient: resize to expected display size
-        memCacheWidth: 200,
+        filterQuality: FilterQuality.high,
         placeholder: (_, __) => _buildShimmer(theme),
         errorWidget: (_, __, ___) => _buildPlaceholder(theme),
       );
@@ -161,6 +160,7 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildArBadge(dynamic theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Positioned(
       top: 8,
       right: 8,
@@ -168,11 +168,13 @@ class ProductCard extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
+          color: isDark
+              ? theme.primaryDark.withValues(alpha: 0.85)
+              : Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 4,
             ),
           ],

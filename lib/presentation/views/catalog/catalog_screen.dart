@@ -398,7 +398,7 @@ class _FilterSheet extends StatelessWidget {
                   runSpacing: 10,
                   children: categories.map((cat) {
                     final isSelected = cat.id == selectedCategoryId;
-                    return _buildCategoryChip(cat, isSelected);
+                    return _buildCategoryChip(context, cat, isSelected);
                   }).toList(),
                 ),
               ),
@@ -411,13 +411,15 @@ class _FilterSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryChip(dynamic category, bool isSelected) {
+  Widget _buildCategoryChip(BuildContext context, dynamic category, bool isSelected) {
+    final hasChildren = category.children != null && category.children.isNotEmpty;
+
     return GestureDetector(
       onTap: () => onCategorySelected(category.id, category.name),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.only(left: 20, right: 12, top: 12, bottom: 12),
         decoration: BoxDecoration(
           color: isSelected
               ? theme.accentWarm
@@ -430,18 +432,168 @@ class _FilterSheet extends StatelessWidget {
             width: isSelected ? 1.5 : 1,
           ),
         ),
-        child: Text(
-          category.name.toUpperCase(),
-          style: MirageTypography.labelSmall(
-            color: isSelected
-                ? theme.textOnDark
-                : theme.textSecondary,
-          ).copyWith(
-            letterSpacing: 2,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              category.name.toUpperCase(),
+              style: MirageTypography.labelSmall(
+                color: isSelected
+                    ? theme.textOnDark
+                    : theme.textSecondary,
+              ).copyWith(
+                letterSpacing: 2,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+            if (hasChildren) ...[
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => _showSubCategorySheet(context, category),
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.textOnDark.withValues(alpha: 0.2)
+                        : theme.accent.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    size: 14,
+                    color: isSelected ? theme.textOnDark : theme.accent,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
+
+  void _showSubCategorySheet(BuildContext context, dynamic parentCategory) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.45,
+          ),
+          decoration: BoxDecoration(
+            color: theme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Padding(
+                padding: const EdgeInsets.only(top: 14, bottom: 8),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.surfaceVariant.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(Icons.arrow_back, size: 20, color: theme.textSecondary),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        parentCategory.name.toUpperCase(),
+                        style: MirageTypography.headingSmall(
+                          color: theme.textPrimary,
+                        ).copyWith(letterSpacing: 3),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Divider
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 28),
+                height: 0.5,
+                color: theme.surfaceVariant.withValues(alpha: 0.3),
+              ),
+              const SizedBox(height: 20),
+              // Sub-category list
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: (parentCategory.children as List).map<Widget>((sub) {
+                      final isSelected = sub.id == selectedCategoryId;
+                      return GestureDetector(
+                        onTap: () {
+                          // Close sub-category sheet
+                          Navigator.pop(context);
+                          // Trigger selection (parent sheet closes via onCategorySelected)
+                          onCategorySelected(sub.id, sub.name);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? theme.accentWarm
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? theme.accentWarm
+                                  : theme.surfaceVariant.withValues(alpha: 0.5),
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Text(
+                            sub.name.toUpperCase(),
+                            style: MirageTypography.labelSmall(
+                              color: isSelected
+                                  ? theme.textOnDark
+                                  : theme.textSecondary,
+                            ).copyWith(
+                              letterSpacing: 2,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
+

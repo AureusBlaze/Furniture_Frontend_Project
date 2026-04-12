@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: theme.textOnDark),
+                    icon: Icon(Icons.arrow_back, color: theme.brightness == Brightness.dark ? theme.textOnDark : theme.textPrimary),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(height: 24),

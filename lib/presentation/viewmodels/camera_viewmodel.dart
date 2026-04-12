@@ -12,12 +12,14 @@ class CameraViewModel extends ChangeNotifier {
 
   File? _capturedImage;
   List<Product> _suggestions = [];
+  String? _roomDescription;
   bool _isLoading = false;
   bool _isAnalyzing = false;
   String? _error;
 
   File? get capturedImage => _capturedImage;
   List<Product> get suggestions => _suggestions;
+  String? get roomDescription => _roomDescription;
   bool get isLoading => _isLoading;
   bool get isAnalyzing => _isAnalyzing;
   String? get error => _error;
@@ -32,6 +34,7 @@ class CameraViewModel extends ChangeNotifier {
       if (photo != null) {
         _capturedImage = File(photo.path);
         _suggestions = [];
+        _roomDescription = null;
         _error = null;
         notifyListeners();
       }
@@ -51,6 +54,7 @@ class CameraViewModel extends ChangeNotifier {
       if (photo != null) {
         _capturedImage = File(photo.path);
         _suggestions = [];
+        _roomDescription = null;
         _error = null;
         notifyListeners();
       }
@@ -70,7 +74,10 @@ class CameraViewModel extends ChangeNotifier {
     final result = await _aiRepository.getSuggestions(_capturedImage!);
     result.fold(
       (failure) => _error = failure.message,
-      (products) => _suggestions = products,
+      (analysisResult) {
+        _suggestions = analysisResult.products;
+        _roomDescription = analysisResult.description;
+      },
     );
 
     _isAnalyzing = false;
@@ -80,6 +87,7 @@ class CameraViewModel extends ChangeNotifier {
   void reset() {
     _capturedImage = null;
     _suggestions = [];
+    _roomDescription = null;
     _error = null;
     _isAnalyzing = false;
     notifyListeners();

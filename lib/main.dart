@@ -15,6 +15,7 @@ import 'presentation/viewmodels/checkout_viewmodel.dart';
 import 'presentation/viewmodels/search_viewmodel.dart';
 import 'presentation/viewmodels/ar_list_viewmodel.dart';
 import 'presentation/viewmodels/camera_viewmodel.dart';
+import 'presentation/viewmodels/order_history_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +51,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => sl<SearchViewModel>()),
         ChangeNotifierProvider(create: (_) => sl<ArListViewModel>()),
         ChangeNotifierProvider(create: (_) => sl<CameraViewModel>()),
+        ChangeNotifierProvider(create: (_) => sl<OrderHistoryViewModel>()),
       ],
       child: const MirageApp(),
     ),

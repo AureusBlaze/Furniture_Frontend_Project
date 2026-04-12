@@ -118,7 +118,7 @@ class MirageTheme {
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: theme.primaryDark,
+        backgroundColor: isDark ? theme.primaryDark : theme.surface,
         selectedItemColor: theme.accent,
         unselectedItemColor: theme.textSecondary,
         type: BottomNavigationBarType.fixed,

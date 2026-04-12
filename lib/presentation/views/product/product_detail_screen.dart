@@ -81,7 +81,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: theme.textPrimary, size: 20),
+                    icon: Icon(Icons.arrow_back,
+                        color: theme.brightness == Brightness.dark
+                            ? theme.textOnDark
+                            : theme.textPrimary,
+                        size: 20),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -226,6 +230,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                       success
                                                           ? '$productName added to cart'
                                                           : 'Could not add to cart — please try again',
+                                                      style: TextStyle(color: theme.textOnDark),
                                                     ),
                                                     backgroundColor: success
                                                         ? theme.primaryDark
@@ -246,7 +251,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                 messenger.clearSnackBars();
                                                 messenger.showSnackBar(
                                                   SnackBar(
-                                                    content: Text('Error: $e'),
+                                                    content: Text('Error: $e',
+                                                        style: TextStyle(color: theme.textOnDark)),
                                                     backgroundColor: theme.error,
                                                     behavior: SnackBarBehavior.floating,
                                                     shape: RoundedRectangleBorder(

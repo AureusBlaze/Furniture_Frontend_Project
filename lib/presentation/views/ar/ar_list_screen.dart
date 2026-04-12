@@ -6,6 +6,7 @@ import 'package:mirage_by_aurues/presentation/viewmodels/ar_list_viewmodel.dart'
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
 import 'package:mirage_by_aurues/presentation/widgets/shimmer_loading.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
+import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
 
 /// AR List screen — products with AR support, dynamically populated
 /// from the database (only items flagged as AR-enabled).
@@ -17,12 +18,20 @@ class ArListScreen extends StatefulWidget {
 }
 
 class _ArListScreenState extends State<ArListScreen> {
+  final _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ArListViewModel>().loadArProducts();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -92,29 +101,37 @@ class _ArListScreenState extends State<ArListScreen> {
             );
           }
 
-          return GridView.builder(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top,
-              left: 16,
-              right: 16,
-              bottom: 100,
-            ),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.6,
-            ),
-            itemCount: vm.products.length,
-            itemBuilder: (_, index) {
-              final product = vm.products[index];
-              return ProductCard(
-                product: product,
-                onTap: () => Navigator.of(
-                  context,
-                ).pushNamed('/product', arguments: product.id),
-              );
-            },
+          return AureusRefreshWrapper(
+            onRefresh: vm.refresh,
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top,
+                  left: 16,
+                  right: 16,
+                  bottom: 100,
+                ),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate((_, index) {
+                    final product = vm.products[index];
+                    return ProductCard(
+                      product: product,
+                      onTap: () => Navigator.of(
+                        context,
+                      ).pushNamed('/product', arguments: product.id),
+                    );
+                  }, childCount: vm.products.length),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.6,
+                      ),
+                ),
+              ),
+            ],
           );
         },
       ),
