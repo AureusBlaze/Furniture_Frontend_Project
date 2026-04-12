@@ -20,15 +20,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Transparent status bar
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
+      // statusBarIconBrightness: Brightness.light,
     ),
   );
 
@@ -41,7 +39,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider.value(value: sl<DevSettingsProvider>()),
         ChangeNotifierProvider.value(value: sl<ConnectionStatusService>()),
-        ChangeNotifierProvider(create: (_) => sl<AuthViewModel>()..checkAuthStatus()),
+        ChangeNotifierProvider(
+          create: (_) => sl<AuthViewModel>()..checkAuthStatus(),
+        ),
         ChangeNotifierProvider(create: (_) => sl<HomeViewModel>()),
         ChangeNotifierProvider(create: (_) => sl<CatalogViewModel>()),
         ChangeNotifierProvider(create: (_) => sl<ProductDetailViewModel>()),

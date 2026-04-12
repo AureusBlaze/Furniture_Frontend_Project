@@ -1,5 +1,8 @@
 package com.example.mirage_by_aurues
 
-import io.flutter.embedding.android.FlutterActivity
+// import com.learntoflutter.flutter_embed_unity_android.unity.FakeUnityPlayerActivity;
+import io.flutter.embedding.android.FlutterFragmentActivity;
 
-class MainActivity : FlutterActivity()
+class MainActivity: FlutterFragmentActivity() {
+    
+}
