@@ -4,7 +4,6 @@ import 'package:mirage_by_aurues/app/theme/theme_provider.dart';
 import 'package:mirage_by_aurues/app/theme/mirage_typography.dart';
 import 'package:mirage_by_aurues/presentation/viewmodels/camera_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/product_card.dart';
-import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 import 'package:mirage_by_aurues/presentation/widgets/glassmorphic_container.dart';
 import 'package:mirage_by_aurues/presentation/widgets/background_layer.dart';
 import 'package:mirage_by_aurues/presentation/widgets/animated_border.dart';
@@ -27,10 +26,14 @@ class CameraAiScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 12),
           child: BevelContainer(
             isCircular: true,
-            backgroundColor: theme.primaryDark.withValues(alpha: 0.85),
+            backgroundColor: (theme.brightness == Brightness.dark ? theme.primaryDark : theme.surface).withValues(alpha: 0.85),
             padding: EdgeInsets.zero,
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: theme.textOnDark, size: 20),
+              icon: Icon(Icons.arrow_back,
+                  color: theme.brightness == Brightness.dark
+                      ? theme.textOnDark
+                      : theme.textPrimary,
+                  size: 20),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -63,6 +66,8 @@ class CameraAiScreen extends StatelessWidget {
                       _buildActionButtons(vm, theme),
                     if (vm.isAnalyzing) _buildLoading(theme),
                     if (vm.error != null) _buildError(vm, theme),
+                    if (vm.roomDescription != null && vm.suggestions.isNotEmpty)
+                      _buildRoomAnalysisButton(context, vm, theme),
                     if (vm.suggestions.isNotEmpty)
                       _buildSuggestions(context, vm, theme),
                   ],
@@ -279,6 +284,44 @@ class CameraAiScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoomAnalysisButton(
+    BuildContext context,
+    CameraViewModel vm,
+    dynamic theme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 4),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pushNamed(
+              '/room-description',
+              arguments: vm.roomDescription,
+            );
+          },
+          icon: Icon(Icons.auto_awesome, size: 18, color: theme.accent),
+          label: Text(
+            'VIEW ROOM ANALYSIS',
+            style: TextStyle(
+              color: theme.accent,
+              letterSpacing: 2,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: theme.accent, width: 1.5),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            backgroundColor: theme.accent.withValues(alpha: 0.08),
+          ),
         ),
       ),
     );

@@ -30,6 +30,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return RepaintBoundary(
       child: SafeArea(
@@ -39,7 +40,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               // Left: Circular Nav Button + Cart
-              _buildLeftSection(context, theme),
+              _buildLeftSection(context, theme, isDark),
               const Spacer(),
               // Center: "MIRAGE" brand name
               Text(
@@ -48,12 +49,14 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 6,
-                  color: theme.textOnDark.withValues(alpha: 0.7),
+                  color: isDark
+                      ? theme.textOnDark.withValues(alpha: 0.7)
+                      : theme.textPrimary.withValues(alpha: 0.7),
                 ),
               ),
               const Spacer(),
               // Right: Search + Camera
-              _buildRightSection(theme),
+              _buildRightSection(theme, isDark),
             ],
           ),
         ),
@@ -61,13 +64,16 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildLeftSection(BuildContext context, dynamic theme) {
+  Widget _buildLeftSection(BuildContext context, dynamic theme, bool isDark) {
+    final iconColor = isDark ? theme.textOnDark : theme.textPrimary;
     return Row(
       children: [
         // Circular nav hub button
         BevelContainer(
           isCircular: true,
-          backgroundColor: theme.primaryDark.withValues(alpha: 0.85),
+          backgroundColor: isDark
+              ? theme.primaryDark.withValues(alpha: 0.85)
+              : theme.surface.withValues(alpha: 0.9),
           padding: EdgeInsets.zero,
           child: SizedBox(
             width: 44,
@@ -85,7 +91,9 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
         // Cart button — solid container, no BackdropFilter
         Container(
           decoration: BoxDecoration(
-            color: theme.primaryDark.withValues(alpha: 0.92),
+            color: isDark
+                ? theme.primaryDark.withValues(alpha: 0.92)
+                : theme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -100,17 +108,20 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-          child: _buildCartButton(context, theme),
+          child: _buildCartButton(context, theme, iconColor),
         ),
       ],
     );
   }
 
-  Widget _buildRightSection(dynamic theme) {
+  Widget _buildRightSection(dynamic theme, bool isDark) {
+    final iconColor = isDark ? theme.textOnDark : theme.textPrimary;
     // Solid container — no BackdropFilter
     return Container(
       decoration: BoxDecoration(
-        color: theme.primaryDark.withValues(alpha: 0.92),
+        color: isDark
+            ? theme.primaryDark.withValues(alpha: 0.92)
+            : theme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -129,12 +140,12 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           IconButton(
             icon: Icon(Icons.search,
-                color: theme.textOnDark, size: 20),
+                color: iconColor, size: 20),
             onPressed: onSearchTap,
           ),
           IconButton(
             icon: Icon(Icons.camera_alt_outlined,
-                color: theme.textOnDark, size: 20),
+                color: iconColor, size: 20),
             onPressed: onCameraTap,
           ),
         ],
@@ -142,7 +153,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildCartButton(BuildContext context, dynamic theme) {
+  Widget _buildCartButton(BuildContext context, dynamic theme, Color iconColor) {
     return Selector<CartViewModel, int>(
       selector: (_, vm) => vm.itemCount,
       builder: (_, count, __) {
@@ -150,7 +161,7 @@ class MirageTopBar extends StatelessWidget implements PreferredSizeWidget {
           children: [
             IconButton(
               icon: Icon(Icons.shopping_bag_outlined,
-                  color: theme.textOnDark, size: 20),
+                  color: iconColor, size: 20),
               onPressed: onCartTap,
             ),
             if (count > 0)

@@ -9,6 +9,8 @@ import 'package:mirage_by_aurues/presentation/views/cart/cart_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/checkout/checkout_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/search/search_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/camera/camera_ai_screen.dart';
+import 'package:mirage_by_aurues/presentation/views/camera/room_description_screen.dart';
+import 'package:mirage_by_aurues/presentation/views/profile/order_history_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/profile/login_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/profile/register_screen.dart';
 import 'package:mirage_by_aurues/presentation/views/product/product_detail_screen.dart';
@@ -105,6 +107,15 @@ class MirageApp extends StatelessWidget {
       case '/dev-settings':
         return MaterialPageRoute(
           builder: (_) => const DevSettingsScreen(),
+        );
+      case '/room-description':
+        final description = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => RoomDescriptionScreen(description: description),
+        );
+      case '/order-history':
+        return MaterialPageRoute(
+          builder: (_) => const OrderHistoryScreen(),
         );
       default:
         return MaterialPageRoute(

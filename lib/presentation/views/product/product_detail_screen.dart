@@ -8,7 +8,7 @@ import 'package:mirage_by_aurues/presentation/viewmodels/product_detail_viewmode
 import 'package:mirage_by_aurues/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:mirage_by_aurues/presentation/widgets/aureus_navigation_guard.dart';
 import 'package:mirage_by_aurues/presentation/widgets/aureus_refresh_wrapper.dart';
-import 'product_ar_screen.dart';
+import 'package:mirage_by_aurues/presentation/views/product/product_ar_screen.dart';
 
 /// Product detail screen — hero image, info, and add to cart.
 class ProductDetailScreen extends StatefulWidget {
@@ -96,7 +96,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          color: theme.textPrimary,
+                          color: theme.brightness == Brightness.dark
+                              ? theme.textOnDark
+                              : theme.textPrimary,
                           size: 20,
                         ),
                         onPressed: () => Navigator.pop(context),
@@ -292,6 +294,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                           success
                                                               ? '$productName added to cart'
                                                               : 'Could not add to cart — please try again',
+                                                          style: TextStyle(
+                                                            color: theme
+                                                                .textOnDark,
+                                                          ),
                                                         ),
                                                         backgroundColor: success
                                                             ? theme.primaryDark
@@ -332,6 +338,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                       SnackBar(
                                                         content: Text(
                                                           'Error: $e',
+                                                          style: TextStyle(
+                                                            color: theme
+                                                                .textOnDark,
+                                                          ),
                                                         ),
                                                         backgroundColor:
                                                             theme.error,

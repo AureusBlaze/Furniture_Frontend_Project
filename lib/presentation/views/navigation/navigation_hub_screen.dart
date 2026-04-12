@@ -301,7 +301,7 @@ class _NavigationHubScreenState extends State<NavigationHubScreen>
               onTap: () {
                 Navigator.of(context).pushReplacementNamed(
                   '/shell',
-                  arguments: 1,
+                  arguments: 0,
                 );
               },
               child: Container(

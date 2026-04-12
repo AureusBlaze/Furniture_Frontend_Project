@@ -182,19 +182,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           theme,
           icon: Icons.receipt_long_outlined,
           label: 'Order History',
-          onTap: () {},
+          onTap: () => Navigator.of(context).pushNamed('/order-history'),
         ),
         _buildMenuItem(
           theme,
-          icon: Icons.favorite_outline,
-          label: 'Wishlist',
-          onTap: () {},
+          icon: Icons.shield_outlined,
+          label: 'Privacy Policy',
+          onTap: () => _showContentDialog(
+            context,
+            theme,
+            'Privacy Policy',
+            'Your privacy matters to us at Aureus Studio. We collect only essential data to provide our services. Your personal information is encrypted and never shared with third parties without your consent. For detailed information, please visit our website.',
+          ),
         ),
         _buildMenuItem(
           theme,
-          icon: Icons.settings_outlined,
-          label: 'Settings',
-          onTap: () {},
+          icon: Icons.description_outlined,
+          label: 'Terms of Service',
+          onTap: () => _showContentDialog(
+            context,
+            theme,
+            'Terms of Service',
+            'By using Mirage, you agree to our terms of service. All products displayed are subject to availability. Prices may vary and are confirmed at checkout. AR visualizations are approximations and may differ from actual product dimensions. For complete terms, please visit our website.',
+          ),
         ),
 
         const SizedBox(height: 24),
@@ -296,6 +306,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Shows a premium-styled dialog for policy/terms content.
+  void _showContentDialog(
+    BuildContext context,
+    dynamic theme,
+    String title,
+    String content,
+  ) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: theme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          title.toUpperCase(),
+          style: MirageTypography.headingSmall(
+            color: theme.textPrimary,
+          ).copyWith(letterSpacing: 2),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            content,
+            style: MirageTypography.bodyMedium(
+              color: theme.textSecondary,
+            ).copyWith(height: 1.7),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'CLOSE',
+              style: TextStyle(
+                color: theme.accent,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

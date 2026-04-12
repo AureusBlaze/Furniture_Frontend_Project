@@ -29,4 +29,8 @@ class ArListViewModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<void> refresh() async {
+    await loadArProducts();
+  }
 }

@@ -58,6 +58,10 @@ class MirageBottomNavBar extends StatelessWidget {
 
   Widget _buildNavItem(dynamic theme, _NavItem item) {
     final isActive = item.index == currentIndex;
+    final isDark = theme.brightness == Brightness.dark;
+    final navColor = isDark ? theme.primaryDark : theme.surface;
+    final iconColor = isDark ? theme.textOnDark : theme.textPrimary;
+    final borderColor = isDark ? Colors.white.withValues(alpha: 0.08) : theme.surfaceVariant;
 
     return GestureDetector(
       onTap: () => onTap(item.index),
@@ -69,13 +73,13 @@ class MirageBottomNavBar extends StatelessWidget {
         decoration: BoxDecoration(
           // Solid opaque background — no BackdropFilter needed
           color: isActive
-              ? theme.primaryDark
-              : theme.primaryDark.withValues(alpha: 0.92),
+              ? navColor
+              : navColor.withValues(alpha: 0.92),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive
                 ? theme.accent.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.08),
+                : borderColor,
             width: isActive ? 1.0 : 0.5,
           ),
           boxShadow: [
@@ -105,7 +109,7 @@ class MirageBottomNavBar extends StatelessWidget {
               size: 22,
               color: isActive
                   ? theme.accent
-                  : theme.textOnDark.withValues(alpha: 0.5),
+                  : iconColor.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 2),
             AnimatedContainer(

@@ -77,8 +77,7 @@ class CategoryCard extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        // Memory-efficient: resize to expected display size
-        memCacheWidth: 400,
+        filterQuality: FilterQuality.high,
         placeholder: (_, __) =>
             Container(color: theme.surfaceVariant.withValues(alpha: 0.2)),
         errorWidget: (_, __, ___) => _buildImagePlaceholder(theme),

@@ -61,10 +61,10 @@ class ThemeConfigScreen extends StatelessWidget {
         children: [
           BevelContainer(
             isCircular: true,
-            backgroundColor: theme.primaryDark.withValues(alpha: 0.7),
+            backgroundColor: (theme.brightness == Brightness.dark ? theme.primaryDark : theme.surface).withValues(alpha: 0.7),
             padding: EdgeInsets.zero,
             child: IconButton(
-              icon: Icon(Icons.close, color: theme.textOnDark, size: 20),
+              icon: Icon(Icons.close, color: theme.brightness == Brightness.dark ? theme.textOnDark : theme.textPrimary, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
           ),

@@ -28,10 +28,10 @@ class CartScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 12),
           child: BevelContainer(
             isCircular: true,
-            backgroundColor: theme.primaryDark.withValues(alpha: 0.85),
+            backgroundColor: (theme.brightness == Brightness.dark ? theme.primaryDark : theme.surface).withValues(alpha: 0.85),
             padding: EdgeInsets.zero,
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: theme.textOnDark, size: 20),
+              icon: Icon(Icons.arrow_back, color: theme.brightness == Brightness.dark ? theme.textOnDark : theme.textPrimary, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
           ),
